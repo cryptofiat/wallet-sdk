@@ -2,6 +2,7 @@ import eth from 'ethereumjs-util';
 import crypto from 'crypto';
 import AES from 'crypto-js/aes';
 import Utf8 from 'crypto-js/enc-utf8';
+import http from 'http';
 
 import MobileId from './providers/MobileId';
 
@@ -9,6 +10,8 @@ export class Application {
 
     constructor() {
         this._secretChallenge = "QUICKBROWNMOOSEJUMPEDOVERTHEFENCEANDBROKEHERLEG"; //some random text would
+        this.ID_SERVER = "http://id.euro2.ee:8080/v1/";
+        this.WALLET_SERVER = "http://wallet.euro2.ee:8080/v1/";
     }
 
     attachStorage(storage) {
@@ -152,8 +155,8 @@ export class Application {
 			"signature": eth.bufferToHex(ec2.r)
 			+ eth.bufferToHex(ec2.s) + ec2.v
 			};
-	console.log(postData);
-	console.log(JSON.stringify(postData));
+	// console.log(postData);
+	// console.log(JSON.stringify(postData));
         /*
 		Utils.xhr(EtheriumService.GATEWAY_URL + '/v1/transfers', JSON.stringify(postData), (res)=> {
 		    var data = JSON.parse(res);
@@ -189,6 +192,8 @@ export class Application {
 
     balanceOfAddress(address) {
         //ask balance from wallet
+        let req = http.request(this.WALLET_SERVER+"fee", 
+        );
         return 155.22
     }
 
