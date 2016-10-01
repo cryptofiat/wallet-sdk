@@ -6,13 +6,18 @@ export function xhr(url, data, cb, method = 'GET', ecb = null, withCredentials =
     xhr.send(data);
     if (cb) {
         xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && (xhr.status >= 200 && xhr.status < 300 || xhr.status === 304)) {
+            if (xhr.readyState !== 4) return;
+            if (xhr.status >= 200 && xhr.status < 300 || xhr.status === 304) {
                 cb(xhr.response);
             } else if (ecb) {
-                console.log("Error: " + xhr.status);
                 ecb(xhr.response);
             }
         };
     }
     return xhr;
 }
+
+export function xhrPromise(url, data, method = 'GET', withCredentials = false) {
+    return new Promise((resolve, reject) => xhr(url, data, resolve, method, reject, withCredentials))
+}
+
