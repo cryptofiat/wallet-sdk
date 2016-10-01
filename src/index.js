@@ -3,6 +3,8 @@ import crypto from 'crypto';
 import AES from 'crypto-js/aes';
 import Utf8 from 'crypto-js/enc-utf8';
 
+import MobileId from './providers/MobileId';
+
 export class Application {
 
     constructor() {
@@ -127,7 +129,7 @@ export class Application {
 
 		// or copy the whole data and send to the contract
         /*
-       	var data = "0x" + keccak_256("delegatedTransfer(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32,address)").substring(0, 8) 
+       	var data = "0x" + keccak_256("delegatedTransfer(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32,address)").substring(0, 8)
 			+ this.paddedAddress(_from)
 			+ this.paddedAddress(to)
 			+ this.uint256Hex(amount)
@@ -141,8 +143,8 @@ export class Application {
 		console.log("Constructed data for delegateTransfer call: "+data);
            */
 	var postData = {
-			"amount": amount, 
-			"fee": fee, 
+			"amount": amount,
+			"fee": fee,
 			"nonce": nonce,
 			"reference": "",
 			"sourceAccount": "0x"+fromaddr,
@@ -158,12 +160,12 @@ export class Application {
 		    console.log('Transfer hash:', data.id);
 		    if (parseInt(data.id,16) == 0) {
 			console.log("Submit failed by wallet-server. Check if account unlocked and sufficient eth.");
-			document.querySelector("#status-data").innerHTML = "Submit failed on server."; 
+			document.querySelector("#status-data").innerHTML = "Submit failed on server.";
 		    } else {
-			document.querySelector("#status-data").innerHTML = 'Submitted <a href=https://etherscan.io/tx/"'+data.id+'">tx</a>'; 
+			document.querySelector("#status-data").innerHTML = 'Submitted <a href=https://etherscan.io/tx/"'+data.id+'">tx</a>';
 		    }
 		},'POST', (err) => {
-			document.querySelector("#status-data").innerHTML = "Server rejected submit."; 
+			document.querySelector("#status-data").innerHTML = "Server rejected submit.";
 			console.log(err);
 		});
 	}
@@ -179,11 +181,11 @@ export class Application {
 
         return 0.01;
     }
-    
+
     getDelegatedNonce(address) {
         //TODO: call wallet.euro2.ee:8080/vi/get/delegateNonce for the address
         return 2;
-    } 
+    }
 
     balanceOfAddress(address) {
         //ask balance from wallet
@@ -202,7 +204,7 @@ export class Application {
 
         let address_data = _keys.reduce((prev, curr) => {
             addr = eth.bufferToHex(pubToAddress(privateToPublic(curr)));
-            prev[addr] = {"balance": this.balanceOfAddress(addr), 
+            prev[addr] = {"balance": this.balanceOfAddress(addr),
                           "approved": this.isAddressApproved(addr),
                           "privKey": curr
                           }
@@ -284,16 +286,13 @@ export function pubToAddress(publicKey) {
     return eth.pubToAddress(publicKey)
 }
 
-/*let privateKey = _generatePrivate();
- let publicKey = _privateToPublic(privateKey);
- let addr = _pubToAddress(publicKey);
 
- document.querySelector('body').innerHTML = addr.toString("hex");*/
+/* document.querySelector('body').innerHTML = addr.toString("hex");*!/
 
 var app = new Application();
 app.attachStorage(window.localStorage);
 app.initLocalStorage("mypass");
-console.log(app.isUnlocked());
+console.log(app.isUnlocked());*/
 
 /*
 
@@ -313,9 +312,12 @@ console.log(app.isUnlocked());
  //console.log(AES.decrypt(testcrypt,"mypass").toString(CryptoJS.enc.Utf8));
  */
 
+/*
 var addr = app.storeNewKey();
 app.storeNewKey("0x0faf1af8b4cbeadb3b8fc2c2dfa2e3642575cd0c166cda731738227371768595");
 var addrs = app.addresses();
 console.log(addrs);
 console.log(app.balances());
 console.log(app.sendToEstonianIdCode(3909323,3.22,""));
+
+new MobileId();*/
