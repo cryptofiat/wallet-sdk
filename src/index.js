@@ -194,11 +194,10 @@ export class Application {
     getFee() {
 
         //TODO: get from wallet.euro2.ee
-        var promise = Utils.xhrPromise(this.WALLET_SERVER+"fees");
-        
-        return promise
+        // var promise = Utils.xhrPromise(this.WALLET_SERVER+"fees");
+        // return promise
 
-        //return 0.01;
+        return 0.01;
     }
 
     contractDataByAddressAsync(address) {
@@ -207,28 +206,6 @@ export class Application {
 		return JSON.parse(response)
 	} );
     }
-
-    getDelegatedNonce(address) {
-        //ask balance from wallet
-        return 2;
-        //return Utils.xhrPromise(this.WALLET_SERVER+"accounts/"+address);
-    }
-
-    balanceOfAddress(address) {
-        //ask balance from wallet
-        //return Utils.xhrPromise(this.WALLET_SERVER+"accounts/"+address+"/balance");
-        
-        return 155.22
-    }
-
-    isAddressApproved(address) {
-
-        //return Utils.xhrPromise(this.WALLET_SERVER+"accounts/"+address);
-        //ask that from wallete
-        return true;
-    }
-
-    
 
     contractDataAsync() {
 
@@ -247,7 +224,7 @@ export class Application {
             })
         });
 
-    return Promise.all(keysPromiseArray)
+        return Promise.all(keysPromiseArray)
 
     }
 
