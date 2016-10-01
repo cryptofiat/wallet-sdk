@@ -5,11 +5,7 @@ export default class MobileId {
     constructor() {
         //console.log(1324, http);
 
-        Utils.xhr('http://www.google.com',null, ()=>{
-            console.log(arguments);
-        });
-
-
+        Utils.xhrPromise('http://id.euro2.ee:8080/v1/accounts').then((data)=>console.log(data))
 
     }
 }
