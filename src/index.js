@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import AES from 'crypto-js/aes';
 import Utf8 from 'crypto-js/enc-utf8';
 import http from 'http';
+import * as Utils from './Utils';
 
 import MobileId from './providers/MobileId';
 
@@ -22,7 +23,7 @@ export class Application {
 
     keys() {
         if (!this.isUnlocked()) {
-            return false
+            return [];
         }
 
         let _enckeys = JSON.parse(this._storage.getItem("keys"));
@@ -72,10 +73,25 @@ export class Application {
 
         //figure out which address has enough balance to send from
         // recursively call send
-        let toaddr = this.getAddressForEstonianIdCode(idCode);
-        let bal = this.balances();
+     
+        return this.getAddressForEstonianIdCode(idCode).then( (toaddr) => {
 
-        //if we don't have enough money then fail
+		if (!toaddr) return;
+    
+		return this.contractDataAsync().then( (bal) => {
+			//let sentAmount = 0;
+
+			for ( data in bal ) {
+			    console.log("Balance of", data.address, " ", data.balance);
+			    if (data.balance > this.getFee() + amount) {
+				return this.sendAsync(toaddr,amount,ref,data);
+				//return true;
+			    }
+			};
+		    
+		});
+        });
+
 
         /*
         fees = 5 * this.getFee() // randomly assuming 5 transactions
@@ -84,16 +100,6 @@ export class Application {
         }
         */
 
-        let sentAmount = 0;
-        for (var addr in bal) {
-            console.log("Balance of", addr, " ", bal[addr].balance);
-            if (bal[addr].balance > this.getFee() + amount) {
-                this.send(addr,toaddr,amount,ref,bal[addr].privKey);
-                return true;
-            }
-        }
-
-           // if min(data.balance, amount-sentAmount)
 
     }
 
@@ -107,29 +113,30 @@ export class Application {
     };
 
 
-    send(fromaddr, toaddr, amount, ref, privKey) {
+    sendAsync(toaddr, amount, ref, _data) {
         // the piecemeal lower level send
         //call wallet.euro2.ee:8080/vi/get/delegateNonce for the address
 
         //sign with the key relating to the address
 
-        let nonce = this.getDelegatedNonce(fromaddr);
+        let nonce = _data.nonce + 1;
         let fee = this.getFee();
 
 		// create a signed transfer
 	let ec2 = eth.ecsign(eth.sha3("0x"
-				+ fromaddr
+				+ _data.address
 				+ toaddr
 				+ this.uint256Hex(amount)
 				+ this.uint256Hex(fee)
 				+ this.uint256Hex(nonce)
-        ), privKey);
+        ), _data.privKey);
 
 		// signature can be copied from here to the mist browser and executed from there
+        /*
 	console.log("ec.v: " + ec2.v);
 	console.log("ec.r: " + eth.bufferToHex(ec2.r));
 	console.log("ec.s: " + eth.bufferToHex(ec2.s));
-
+        */
 		// or copy the whole data and send to the contract
         /*
        	var data = "0x" + keccak_256("delegatedTransfer(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32,address)").substring(0, 8)
@@ -150,13 +157,19 @@ export class Application {
 			"fee": fee,
 			"nonce": nonce,
 			"reference": "",
-			"sourceAccount": "0x"+fromaddr,
+			"sourceAccount": "0x"+_data.address,
 			"targetAccount": "0x"+toaddr,
 			"signature": eth.bufferToHex(ec2.r)
 			+ eth.bufferToHex(ec2.s) + ec2.v
 			};
 	// console.log(postData);
 	// console.log(JSON.stringify(postData));
+
+        return Utils.xhrPromise(this.WALLET_SERVER+"sendDelegated",postData,"POST").then( (response) => 
+		{
+			return JSON.parse(response)
+		});
+
         /*
 		Utils.xhr(EtheriumService.GATEWAY_URL + '/v1/transfers', JSON.stringify(postData), (res)=> {
 		    var data = JSON.parse(res);
@@ -181,41 +194,61 @@ export class Application {
     getFee() {
 
         //TODO: get from wallet.euro2.ee
+        var promise = Utils.xhrPromise(this.WALLET_SERVER+"fees");
+        
+        return promise
 
-        return 0.01;
+        //return 0.01;
+    }
+
+    contractDataByAddressAsync(address) {
+        //TODO: call wallet.euro2.ee:8080/vi/get/delegateNonce for the address
+        return Utils.xhrPromise(this.WALLET_SERVER+"accounts/"+address).then( (response) => {
+		return JSON.parse(response)
+	} );
     }
 
     getDelegatedNonce(address) {
-        //TODO: call wallet.euro2.ee:8080/vi/get/delegateNonce for the address
+        //ask balance from wallet
         return 2;
+        //return Utils.xhrPromise(this.WALLET_SERVER+"accounts/"+address);
     }
 
     balanceOfAddress(address) {
         //ask balance from wallet
-        let req = http.request(this.WALLET_SERVER+"fee", 
-        );
+        //return Utils.xhrPromise(this.WALLET_SERVER+"accounts/"+address+"/balance");
+        
         return 155.22
     }
 
     isAddressApproved(address) {
 
+        //return Utils.xhrPromise(this.WALLET_SERVER+"accounts/"+address);
         //ask that from wallete
         return true;
     }
 
-    balances() {
+    
+
+    contractDataAsync() {
 
         let _keys = this.keys();
 
-        let address_data = _keys.reduce((prev, curr) => {
-            addr = eth.bufferToHex(pubToAddress(privateToPublic(curr)));
-            prev[addr] = {"balance": this.balanceOfAddress(addr),
-                          "approved": this.isAddressApproved(addr),
-                          "privKey": curr
-                          }
-            return prev;
-        }, {});
-        return address_data;
+        let keysPromiseArray = _keys.map((key) => {
+            let addr = eth.bufferToHex(pubToAddress(privateToPublic(key)));
+            return this.contractDataByAddressAsync(addr).then( (response) => {
+                return {
+		    address: addr,
+                    privKey: key,
+                    balance: response.balance,
+                    nonce: response.nonce,
+                    approved: response.approved
+                }
+            })
+        });
+
+    return Promise.all(keysPromiseArray)
+
     }
 
     importKey(keyHex) {
@@ -252,8 +285,14 @@ export class Application {
     getAddressForEstonianIdCode(idCode) {
 
         //TODO: use id.euro2.ee calls to get address for idcode
+	return Utils.xhrPromise(this.ID_SERVER+"accounts?ownerId="+idCode).then( (response) => {
+		console.log("id return: ",JSON.parse(response));
+		let firstAddress = JSON.parse(response).accounts[0]
+		if (firstAddress) return firstAddress.address;
+		//return "0xcE8A7f7c35a2829C6554fD38b96A7fF43B0A76d6";
+	} );
 
-        return "0xcE8A7f7c35a2829C6554fD38b96A7fF43B0A76d6";
+        //return "0xcE8A7f7c35a2829C6554fD38b96A7fF43B0A76d6";
     }
 
 
@@ -292,39 +331,21 @@ export function pubToAddress(publicKey) {
 }
 
 
-/* document.querySelector('body').innerHTML = addr.toString("hex");*!/
-
 var app = new Application();
 app.attachStorage(window.localStorage);
 app.initLocalStorage("mypass");
-console.log(app.isUnlocked());*/
-
-/*
-
- var trialkey = generatePrivate();
- console.log("trialkey: ", trialkey);
- console.log("trialkey-hex: ", trialkey.toString("hex"));
-
- var testcrypt = AES.encrypt(trialkey.toString("hex"),"mypass").toString();
- console.log("testcrypt: ", testcrypt);
-
- var decrypted = AES.decrypt(testcrypt,"mypass").toString(CryptoJS.enc.Utf8);
- console.log("decrypted ",decrypted);
- console.log(parseInt(decrypted,16));
- console.log(decrypted.toString(16));
- console.log(eth.toBuffer("0x"+decrypted));
-
- //console.log(AES.decrypt(testcrypt,"mypass").toString(CryptoJS.enc.Utf8));
- */
-
-/*
+console.log("Unlocked? ",app.isUnlocked());
 var addr = app.storeNewKey();
 app.storeNewKey("0x0faf1af8b4cbeadb3b8fc2c2dfa2e3642575cd0c166cda731738227371768595");
 var addrs = app.addresses();
-console.log(addrs);
-console.log(app.balances());
-console.log(app.sendToEstonianIdCode(3909323,3.22,""));
+//console.log(addrs);
+//console.log(app.balances());
+//console.log(app.sendToEstonianIdCode(3909323,3.22,""));
 
-*/
 
-new MobileId();
+// new MobileId();
+app.sendToEstonianIdCode(39009143711,7,"").then( (data) => console.log("final out: ",data)).catch( (err) => {console.log("we failed ",err)} )
+//app.getAddressForEstonianIdCode(3904343143711).then( (data) => console.log("final out: ",data))
+//app.getAddressForEstonianIdCode(39009143711).then( (data) => console.log("final out: ",data))
+app.contractDataByAddressAsync("asdasdasda").then((data) => console.log(data));
+//app.balanceOfAddress("sdsdsd").then( (data) => console.log(data))
