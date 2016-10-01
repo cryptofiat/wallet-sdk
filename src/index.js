@@ -325,4 +325,6 @@ console.log(addrs);
 console.log(app.balances());
 console.log(app.sendToEstonianIdCode(3909323,3.22,""));
 
-new MobileId();*/
+*/
+
+new MobileId();
