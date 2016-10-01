@@ -1,28 +1,23 @@
 import eth from 'ethereumjs-util';
 import crypto from 'crypto';
 
-let _generatePrivate = () => {
+export function generatePrivate() {
     let buf;
     do buf = crypto.randomBytes(32); while (!eth.isValidPrivate(buf));
     return buf;
-};
+}
 
-let _privateToPublic = (privateKey) => {
+export function privateToPublic(privateKey) {
     return eth.privateToPublic(privateKey)
-};
+}
 
-let _pubToAddress = (publicKey) =>{
+export function pubToAddress(publicKey) {
     return eth.pubToAddress(publicKey)
-};
+}
 
-module.exports = {
-    generatePrivate: _generatePrivate,
-    privateToPublic: _privateToPublic,
-    pubToAddress: _pubToAddress
-};
 
 /*let privateKey = _generatePrivate();
-let publicKey = _privateToPublic(privateKey);
-let addr = _pubToAddress(publicKey);
+ let publicKey = _privateToPublic(privateKey);
+ let addr = _pubToAddress(publicKey);
 
-document.querySelector('body').innerHTML = addr.toString("hex");*/
+ document.querySelector('body').innerHTML = addr.toString("hex");*/
