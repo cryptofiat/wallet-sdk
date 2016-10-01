@@ -83,7 +83,7 @@ export class Application {
         this._storage.setItem("encryptedChallenge", AES.encrypt(this._secretChallenge, this._secret));
     }
 
-    send(toIdCode,amount) {
+    send(toIdCode,amount,ref) {
 
         //call id.euro2.ee/v1/get/toIDCode to get 38008030201
 
@@ -95,6 +95,10 @@ export class Application {
 
         //send to wallet.euro2.ee
 
+    }
+
+    send(fromaddr, toaddr, amount, ref) {
+       // the piecemeal lower level send
     }
 
 
@@ -123,10 +127,52 @@ export class Application {
     importKey(keyHex) {
 
         //TODO:should check if it is valid hex with 0x
+        //TODO:should check if that key already exists in storage
 
-        keyHex
+        this.storeNewKey(keyHex);
     }
 
+    storeEstonianIdCode(idCode) {
+        //place ID code to localstorage
+        let currentIdCode = this._storage.getItem("EstonianIdCode");
+        if (currentIdCode) {
+           if (parseInt(currentIdCode) != parseInt(idCode)) {
+               // we're in trouble - he had another ID code before
+               return false;
+           } else {
+               this._storage.setItem("EstonianIdCode",idCode);
+               return true;
+           } 
+        } 
+    }
+
+    getEstonianIdCode() {
+        return this._storage.getItem("EstonianIdCode");
+    }
+
+    getNameFromEstonianIdCode(idCode) {
+        //TODO: use id.euro2.ee calls to get for idcode
+        return "Toomas Tamm";
+    }
+
+    approveWithEstonianMobileId(address,phonenumber,callback) {
+        // use id.euro2.ee
+        // should return IdCode
+        return 38008030332
+    }
+
+    approveWithEstonianIdCard(address,callback) {
+        // use id.euro2.ee but not sure how
+        // 
+        // should return IdCode
+        return 38008030332
+    }
+
+    approveWithEstonianBankTransfer(address,callback) {
+        // use id.euro2.ee to get the secret reference
+
+        return "moose shoes black"
+    }
 }
 
 export function generatePrivate() {
@@ -141,15 +187,6 @@ export function privateToPublic(privateKey) {
 
 export function pubToAddress(publicKey) {
     return eth.pubToAddress(publicKey)
-}
-
-/*mock*/
-export function balanceMock() {
-    return 123.45;
-}
-
-export function identityCodeMock() {
-    return 38008030123;
 }
 
 /*let privateKey = _generatePrivate();
