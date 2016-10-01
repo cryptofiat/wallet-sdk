@@ -16,21 +16,13 @@ export function pubToAddress(publicKey) {
 }
 
 /*mock*/
-let _balanceMock = () => {
+export function balanceMock() {
     return 123.45;
 }
 
-let _identityCodeMock = () => {
+export function identityCodeMock() {
     return 38008030123;
 }
-
-module.exports = {
-    balance: _balanceMock,
-    identityCode: _identityCodeMock,
-    generatePrivate: _generatePrivate,
-    privateToPublic: _privateToPublic,
-    pubToAddress: _pubToAddress
-};
 
 /*let privateKey = _generatePrivate();
  let publicKey = _privateToPublic(privateKey);
