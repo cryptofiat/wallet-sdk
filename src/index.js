@@ -26,7 +26,6 @@ export class Application {
 
     addresses() {
         let _keys = this.keys();
-        console.log("keys: ", _keys);
         return _keys.map((k) => eth.bufferToHex(pubToAddress(privateToPublic(k))))
     }
 
@@ -64,30 +63,113 @@ export class Application {
 
     sendToEstonianIdCode(idCode, amount, ref) {
 
-        //call id.euro2.ee/v1/get/toIDCode to get 38008030201
+        //call id.euro2.ee/v1/get/toIDCode to get address for 38008030201
 
         //figure out which address has enough balance to send from
         // recursively call send
-
+        let toaddr = this.getAddressForEstonianIdCode(idCode);
         let bal = this.balances();
 
         //if we don't have enough money then fail
 
+        /*
+        fees = 5 * this.getFee() // randomly assuming 5 transactions
+        if (this.balance() < amount + fees) {
+            return false;
+        }
+        */
 
         let sentAmount = 0;
-        bal.forEach((addr, data) => {
-            // if min(data.balance, amount-sentAmount)
-        });
+        for (var addr in bal) {
+            console.log("Balance of", addr, " ", bal[addr].balance);
+            if (bal[addr].balance > this.getFee() + amount) {
+                this.send(addr,toaddr,amount,ref,bal[addr].privKey);
+                return true;
+            }
+        }
+
+           // if min(data.balance, amount-sentAmount)
 
     }
 
-    send(fromaddr, toaddr, amount, ref) {
+    //TODO: should move to utils
+    uint256Hex(_number){
+		//convert to hex of uint256
+		var zeros32="0000000000000000000000000000000000000000000000000000000000000000"
+		var hex = ""+_number.toString(16).slice(2)
+		var padded = zeros32.substring(0, zeros32.length - hex.length) + hex
+		return padded;
+    };
+
+
+    send(fromaddr, toaddr, amount, ref, privKey) {
         // the piecemeal lower level send
         //call wallet.euro2.ee:8080/vi/get/delegateNonce for the address
 
         //sign with the key relating to the address
 
-        //send to wallet.euro2.ee
+        let nonce = this.getDelegatedNonce(fromaddr);
+        let fee = this.getFee();
+
+		// create a signed transfer
+	let ec2 = eth.ecsign(eth.sha3("0x"
+				+ fromaddr
+				+ toaddr
+				+ this.uint256Hex(amount)
+				+ this.uint256Hex(fee)
+				+ this.uint256Hex(nonce)
+        ), privKey);
+
+		// signature can be copied from here to the mist browser and executed from there
+	console.log("ec.v: " + ec2.v);
+	console.log("ec.r: " + eth.bufferToHex(ec2.r));
+	console.log("ec.s: " + eth.bufferToHex(ec2.s));
+
+		// or copy the whole data and send to the contract
+        /*
+       	var data = "0x" + keccak_256("delegatedTransfer(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32,address)").substring(0, 8) 
+			+ this.paddedAddress(_from)
+			+ this.paddedAddress(to)
+			+ this.uint256Hex(amount)
+			+ this.uint256Hex(fee)
+			+ this.uint256Hex(nonce)
+			+ this.uint256Hex(ec2.v)
+			+ ethUtil.stripHexPrefix(ethUtil.bufferToHex(ec2.r))
+			+ ethUtil.stripHexPrefix(ethUtil.bufferToHex(ec2.s))
+			+ this.paddedAddress(_from);
+
+		console.log("Constructed data for delegateTransfer call: "+data);
+           */
+	var postData = {
+			"amount": amount, 
+			"fee": fee, 
+			"nonce": nonce,
+			"reference": "",
+			"sourceAccount": "0x"+fromaddr,
+			"targetAccount": "0x"+toaddr,
+			"signature": eth.bufferToHex(ec2.r)
+			+ eth.bufferToHex(ec2.s) + ec2.v
+			};
+	console.log(postData);
+	console.log(JSON.stringify(postData));
+        /*
+		Utils.xhr(EtheriumService.GATEWAY_URL + '/v1/transfers', JSON.stringify(postData), (res)=> {
+		    var data = JSON.parse(res);
+		    console.log('Transfer hash:', data.id);
+		    if (parseInt(data.id,16) == 0) {
+			console.log("Submit failed by wallet-server. Check if account unlocked and sufficient eth.");
+			document.querySelector("#status-data").innerHTML = "Submit failed on server."; 
+		    } else {
+			document.querySelector("#status-data").innerHTML = 'Submitted <a href=https://etherscan.io/tx/"'+data.id+'">tx</a>'; 
+		    }
+		},'POST', (err) => {
+			document.querySelector("#status-data").innerHTML = "Server rejected submit."; 
+			console.log(err);
+		});
+	}
+        */
+
+
     }
 
 
@@ -97,6 +179,11 @@ export class Application {
 
         return 0.01;
     }
+    
+    getDelegatedNonce(address) {
+        //TODO: call wallet.euro2.ee:8080/vi/get/delegateNonce for the address
+        return 2;
+    } 
 
     balanceOfAddress(address) {
         //ask balance from wallet
@@ -111,10 +198,14 @@ export class Application {
 
     balances() {
 
-        let _addresses = this.addresses();
+        let _keys = this.keys();
 
-        let address_data = _addresses.reduce((prev, curr) => {
-            prev[curr] = {"balance": this.balanceOfAddress(curr), "approved": this.isAddressApproved(curr)}
+        let address_data = _keys.reduce((prev, curr) => {
+            addr = eth.bufferToHex(pubToAddress(privateToPublic(curr)));
+            prev[addr] = {"balance": this.balanceOfAddress(addr), 
+                          "approved": this.isAddressApproved(addr),
+                          "privKey": curr
+                          }
             return prev;
         }, {});
         return address_data;
@@ -150,6 +241,14 @@ export class Application {
         //TODO: use id.euro2.ee calls to get for idcode
         return "Toomas Tamm";
     }
+
+    getAddressForEstonianIdCode(idCode) {
+
+        //TODO: use id.euro2.ee calls to get address for idcode
+
+        return "0xcE8A7f7c35a2829C6554fD38b96A7fF43B0A76d6";
+    }
+
 
     approveWithEstonianMobileId(address, phonenumber, callback) {
         // use id.euro2.ee
@@ -219,3 +318,4 @@ app.storeNewKey("0x0faf1af8b4cbeadb3b8fc2c2dfa2e3642575cd0c166cda731738227371768
 var addrs = app.addresses();
 console.log(addrs);
 console.log(app.balances());
+console.log(app.sendToEstonianIdCode(3909323,3.22,""));
