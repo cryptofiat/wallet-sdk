@@ -223,4 +223,4 @@ app.storeNewKey("0x0faf1af8b4cbeadb3b8fc2c2dfa2e3642575cd0c166cda731738227371768
 var addrs = app.addresses();
 console.log(addrs);
 console.log(app.balances());
-document.querySelector('body').innerHTML = addr.toString("hex");
+//document.querySelector('body').innerHTML = addr.toString("hex");
