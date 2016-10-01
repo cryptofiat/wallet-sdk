@@ -83,24 +83,41 @@ export class Application {
         this._storage.setItem("encryptedChallenge", AES.encrypt(this._secretChallenge, this._secret));
     }
 
-    send(toIdCode,amount,ref) {
+    sendToEstonianIdCode(idCode,amount,ref) {
 
         //call id.euro2.ee/v1/get/toIDCode to get 38008030201
 
         //figure out which address has enough balance to send from
+        // recursively call send
 
-        //call wallet.euro2.ee:8080/vi/get/delegateNonce for the address
+        let bal = this.balances();
 
-        //sign with the key relating to the address
+        //if we don't have enough money then fail
 
-        //send to wallet.euro2.ee
+
+        let sentAmount = 0;
+        bal.forEach( (addr,data) => {
+           // if min(data.balance, amount-sentAmount)
+        });
 
     }
 
     send(fromaddr, toaddr, amount, ref) {
        // the piecemeal lower level send
+        //call wallet.euro2.ee:8080/vi/get/delegateNonce for the address
+
+        //sign with the key relating to the address
+
+        //send to wallet.euro2.ee
     }
 
+
+    getFee() {
+
+        //TODO: get from wallet.euro2.ee
+
+        return 0.01;
+    }
 
     balanceOfAddress(address) {
         //ask balance from wallet
@@ -223,4 +240,3 @@ app.storeNewKey("0x0faf1af8b4cbeadb3b8fc2c2dfa2e3642575cd0c166cda731738227371768
 var addrs = app.addresses();
 console.log(addrs);
 console.log(app.balances());
-document.querySelector('body').innerHTML = addr.toString("hex");
