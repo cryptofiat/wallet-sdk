@@ -1,81 +1,60 @@
 import eth from 'ethereumjs-util';
 import crypto from 'crypto';
 import AES from 'crypto-js/aes';
-import CryptoJS from 'crypto-js';
+import Utf8 from 'crypto-js/enc-utf8';
 
 export class Application {
 
     constructor() {
-         var _secretChallenge = "QUICKBROWNMOOSEJUMPEDOVERTHEFENCEANDBROKEHERLEG"; //some random text would
-         var _storage;
-         var _secret;
+        this._secretChallenge = "QUICKBROWNMOOSEJUMPEDOVERTHEFENCEANDBROKEHERLEG"; //some random text would
     }
 
     attachStorage(storage) {
-         this._storage = storage;
-         return this;
+        this._storage = storage;
+        return this;
     }
-    hasAddresses() {
-         //mock
-         //let _keys = this._storage.getItem("keys");
-         //if(sizeof(_keys) > 0) return true else return false;
-         return true;
-    }
-    
+
+
     keys() {
-         //mock
-         //if(sizeof(_keys) > 0) return true else return false;
+        if (!this.isUnlocked()) {
+            return false
+        }
 
-         // returns array?
-         if (!this.isUnlocked()) { return false };
-
-         let _enckeys = JSON.parse(this._storage.getItem("keys"));
-         let _openkeys = _enckeys.map( (k) => {
-	    return eth.toBuffer("0x"+AES.decrypt(k,this._secret).toString(CryptoJS.enc.Utf8));
-         })
-         return _openkeys;
+        let _enckeys = JSON.parse(this._storage.getItem("keys"));
+        return _enckeys.map((k) => eth.toBuffer("0x" + AES.decrypt(k, this._secret).toString(Utf8)))
     }
 
     addresses() {
-         let _keys = this.keys();
-         console.log("keys: ", _keys);
-         let _addr = _keys.map( function(k) {
-            return eth.bufferToHex(pubToAddress(privateToPublic(k)));
-         })
-         return _addr;
+        let _keys = this.keys();
+        console.log("keys: ", _keys);
+        return _keys.map((k) => eth.bufferToHex(pubToAddress(privateToPublic(k))))
     }
 
     storeNewKey(newKeyHex) {
-	// if newKeyHex is applied, then it is added, otherwise new key generated
+        // if newKeyHex is applied, then it is added, otherwise new key generated
 
-	if (!this.isUnlocked()) { return false; }
-        let keysArray = JSON.parse(this._storage.getItem("keys"));
-	let newPriv;
-        if (newKeyHex) {
-            newPriv=eth.toBuffer(newKeyHex);
-        } else {
-            newPriv = generatePrivate();
+        if (!this.isUnlocked()) {
+            return false;
         }
-	console.log("key: ",newPriv);
-        if (!keysArray) { keysArray = []; }
+        let keysArray = JSON.parse(this._storage.getItem("keys")) || [];
+        let newPriv = newKeyHex? eth.toBuffer(newKeyHex) : generatePrivate();
 
-        let encryptedKey = AES.encrypt(newPriv.toString("hex"),this._secret);
+        let encryptedKey = AES.encrypt(newPriv.toString("hex"), this._secret);
         keysArray.push(encryptedKey.toString());
-        console.log("printkeys:",keysArray);
         this._storage.setItem("keys", JSON.stringify(keysArray));
-	return pubToAddress(privateToPublic(newPriv));
+        return pubToAddress(privateToPublic(newPriv));
     }
 
     isUnlocked() {
-         if (this._secret) { return true } else {return false }; // boolean
+        return !!this._secret
     }
 
     unlock(secret) {
-         if (AES.decrypt(this._storage.getItem("encryptedChallenge"),secret) == this._secretChallenge) { 
-             this._secret = secret;
-             return true; 
-         }
-         return false;
+        if (AES.decrypt(this._storage.getItem("encryptedChallenge"), secret) == this._secretChallenge) {
+            this._secret = secret;
+            return true;
+        }
+        return false;
     }
 
     initLocalStorage(secret) {
@@ -83,7 +62,7 @@ export class Application {
         this._storage.setItem("encryptedChallenge", AES.encrypt(this._secretChallenge, this._secret));
     }
 
-    sendToEstonianIdCode(idCode,amount,ref) {
+    sendToEstonianIdCode(idCode, amount, ref) {
 
         //call id.euro2.ee/v1/get/toIDCode to get 38008030201
 
@@ -96,14 +75,14 @@ export class Application {
 
 
         let sentAmount = 0;
-        bal.forEach( (addr,data) => {
-           // if min(data.balance, amount-sentAmount)
+        bal.forEach((addr, data) => {
+            // if min(data.balance, amount-sentAmount)
         });
 
     }
 
     send(fromaddr, toaddr, amount, ref) {
-       // the piecemeal lower level send
+        // the piecemeal lower level send
         //call wallet.euro2.ee:8080/vi/get/delegateNonce for the address
 
         //sign with the key relating to the address
@@ -126,18 +105,18 @@ export class Application {
 
     isAddressApproved(address) {
 
-	//ask that from wallete
-	return true;
+        //ask that from wallete
+        return true;
     }
 
     balances() {
 
         let _addresses = this.addresses();
-        
-	let address_data = _addresses.reduce( (prev,curr) => {
-            prev[curr] = {"balance":this.balanceOfAddress(curr),"approved":this.isAddressApproved(curr)}
-	    return prev;
-        }, {} );
+
+        let address_data = _addresses.reduce((prev, curr) => {
+            prev[curr] = {"balance": this.balanceOfAddress(curr), "approved": this.isAddressApproved(curr)}
+            return prev;
+        }, {});
         return address_data;
     }
 
@@ -153,14 +132,14 @@ export class Application {
         //place ID code to localstorage
         let currentIdCode = this._storage.getItem("EstonianIdCode");
         if (currentIdCode) {
-           if (parseInt(currentIdCode) != parseInt(idCode)) {
-               // we're in trouble - he had another ID code before
-               return false;
-           } else {
-               this._storage.setItem("EstonianIdCode",idCode);
-               return true;
-           } 
-        } 
+            if (parseInt(currentIdCode) != parseInt(idCode)) {
+                // we're in trouble - he had another ID code before
+                return false;
+            } else {
+                this._storage.setItem("EstonianIdCode", idCode);
+                return true;
+            }
+        }
     }
 
     getEstonianIdCode() {
@@ -172,20 +151,20 @@ export class Application {
         return "Toomas Tamm";
     }
 
-    approveWithEstonianMobileId(address,phonenumber,callback) {
+    approveWithEstonianMobileId(address, phonenumber, callback) {
         // use id.euro2.ee
         // should return IdCode
         return 38008030332
     }
 
-    approveWithEstonianIdCard(address,callback) {
+    approveWithEstonianIdCard(address, callback) {
         // use id.euro2.ee but not sure how
-        // 
+        //
         // should return IdCode
         return 38008030332
     }
 
-    approveWithEstonianBankTransfer(address,callback) {
+    approveWithEstonianBankTransfer(address, callback) {
         // use id.euro2.ee to get the secret reference
 
         return "moose shoes black"
@@ -219,21 +198,21 @@ console.log(app.isUnlocked());
 
 /*
 
-var trialkey = generatePrivate();
-console.log("trialkey: ", trialkey);
-console.log("trialkey-hex: ", trialkey.toString("hex"));
+ var trialkey = generatePrivate();
+ console.log("trialkey: ", trialkey);
+ console.log("trialkey-hex: ", trialkey.toString("hex"));
 
-var testcrypt = AES.encrypt(trialkey.toString("hex"),"mypass").toString();
-console.log("testcrypt: ", testcrypt);
+ var testcrypt = AES.encrypt(trialkey.toString("hex"),"mypass").toString();
+ console.log("testcrypt: ", testcrypt);
 
-var decrypted = AES.decrypt(testcrypt,"mypass").toString(CryptoJS.enc.Utf8);
-console.log("decrypted ",decrypted);
-console.log(parseInt(decrypted,16));
-console.log(decrypted.toString(16));
-console.log(eth.toBuffer("0x"+decrypted));
+ var decrypted = AES.decrypt(testcrypt,"mypass").toString(CryptoJS.enc.Utf8);
+ console.log("decrypted ",decrypted);
+ console.log(parseInt(decrypted,16));
+ console.log(decrypted.toString(16));
+ console.log(eth.toBuffer("0x"+decrypted));
 
-//console.log(AES.decrypt(testcrypt,"mypass").toString(CryptoJS.enc.Utf8));
-*/
+ //console.log(AES.decrypt(testcrypt,"mypass").toString(CryptoJS.enc.Utf8));
+ */
 
 var addr = app.storeNewKey();
 app.storeNewKey("0x0faf1af8b4cbeadb3b8fc2c2dfa2e3642575cd0c166cda731738227371768595");
