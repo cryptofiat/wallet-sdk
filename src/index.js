@@ -263,7 +263,9 @@ export class Application {
                     privKey: key,
                     balance: response.balance,
                     nonce: response.nonce,
-                    approved: response.approved
+                    approved: response.approved,
+                    closed: response.closed,
+                    frozen: response.frozen
                 }
             })
         });
@@ -295,7 +297,10 @@ export class Application {
     }
 
     getEstonianIdCode() {
-        return this._storage.getItem("EstonianIdCode");
+        let idCode = this._storage.getItem("EstonianIdCode");
+	if (idCode) {
+            return idCode;
+        } else return "inactive";
     }
 
     getNameFromEstonianIdCode(idCode) {
