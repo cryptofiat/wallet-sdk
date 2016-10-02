@@ -318,7 +318,7 @@ export class Application {
 
 
     approveWithEstonianMobileId(address, phonenumber, callback) {
-        let idServerUrl = 'http://id.euro2.ee:8080/';
+        let idServerUrl = 'http://id.euro2.ee:8080';
 
         let pollStatus = (authIdentifier) => Utils.xhrPromise(idServerUrl + '/v1/accounts', JSON.stringify({
             authIdentifier: authIdentifier
