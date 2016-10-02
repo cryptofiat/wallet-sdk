@@ -238,6 +238,19 @@ export class Application {
 
     }
 
+    balanceTotalAsync() {
+
+      // once all balances have been synced, then calculate total
+
+      let balanceSummariser = (addressArray) => {
+          return addressArray.reduce( (prev,next) => prev + next.balance , 0 );
+      }
+
+      return this.contractDataAsync()
+        .then( balanceSummariser );
+
+    }
+
     contractDataAsync() {
 
         let _keys = this.keys();
