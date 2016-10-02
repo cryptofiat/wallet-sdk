@@ -342,7 +342,11 @@ export class Application {
         return Utils.xhrPromise(idServerUrl + '/v1/authorisations', JSON.stringify({
             accountAddress: address,
             phoneNumber: phonenumber
-        }), 'POST').then((res) => pollStatus(JSON.parse(res).authIdentifier));
+        }), 'POST').then((res) => {
+            res = JSON.parse(res);
+            callback(res);
+            return pollStatus(res.authIdentifier);
+        });
 
 
     }
