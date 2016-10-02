@@ -320,9 +320,9 @@ export class Application {
     approveWithEstonianMobileId(address, phonenumber, callback) {
         let idServerUrl = 'http://id.euro2.ee:8080/';
 
-        let pollStatus = (authIdentifier) => Utils.xhrPromise(idServerUrl + '/v1/accounts', {
+        let pollStatus = (authIdentifier) => Utils.xhrPromise(idServerUrl + '/v1/accounts', JSON.stringify({
             authIdentifier: authIdentifier
-        }, 'POST').then((res) => {
+        }), 'POST').then((res) => {
             res = JSON.parse(res);
             switch (res.authenticationStatus) {
                 case 'LOGIN_SUCCESS':
@@ -339,10 +339,10 @@ export class Application {
             }
         });
 
-        return Utils.xhrPromise(idServerUrl + '/v1/authorisations', {
+        return Utils.xhrPromise(idServerUrl + '/v1/authorisations', JSON.stringify({
             accountAddress: address,
             phoneNumber: phonenumber
-        }, 'POST').then((res) => pollStatus(JSON.parse(res).authIdentifier));
+        }), 'POST').then((res) => pollStatus(JSON.parse(res).authIdentifier));
 
 
     }
