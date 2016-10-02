@@ -47,7 +47,7 @@ export class Application {
         let encryptedKey = AES.encrypt(newPriv.toString("hex"), this._secret);
         keysArray.push(encryptedKey.toString());
         this._storage.setItem("keys", JSON.stringify(keysArray));
-        return pubToAddress(privateToPublic(newPriv));
+        return privateToPublic(newPriv);
     }
 
     isUnlocked() {
