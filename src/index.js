@@ -347,7 +347,7 @@ export class Application {
         return Utils.xhrPromise(idServerUrl + '/v1/authorisations', {
             accountAddress: address,
             phoneNumber: phonenumber
-        }, 'POST').then((res) => pollStatus(JSON.stringify(res).authIdentifier));
+        }, 'POST').then((res) => pollStatus(JSON.parse(res).authIdentifier));
 
 
     }
