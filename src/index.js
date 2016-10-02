@@ -47,7 +47,7 @@ export class Application {
         let encryptedKey = AES.encrypt(newPriv.toString("hex"), this._secret);
         keysArray.push(encryptedKey.toString());
         this._storage.setItem("keys", JSON.stringify(keysArray));
-        return pubToAddress(privateToPublic(newPriv));
+        return privateToPublic(newPriv);
     }
 
     isUnlocked() {
@@ -323,11 +323,11 @@ export class Application {
 
 
     approveWithEstonianMobileId(address, phonenumber, callback) {
-        let idServerUrl = 'http://id.euro2.ee:8080/';
+        let idServerUrl = 'http://id.euro2.ee:8080';
 
-        let pollStatus = (authIdentifier) => Utils.xhrPromise(idServerUrl + '/v1/accounts', {
+        let pollStatus = (authIdentifier) => Utils.xhrPromise(idServerUrl + '/v1/accounts', JSON.stringify({
             authIdentifier: authIdentifier
-        }, 'POST').then((res) => {
+        }), 'POST').then((res) => {
             res = JSON.parse(res);
             switch (res.authenticationStatus) {
                 case 'LOGIN_SUCCESS':
@@ -344,10 +344,14 @@ export class Application {
             }
         });
 
-        return Utils.xhrPromise(idServerUrl + '/v1/authorisations', {
+        return Utils.xhrPromise(idServerUrl + '/v1/authorisations', JSON.stringify({
             accountAddress: address,
             phoneNumber: phonenumber
-        }, 'POST').then((res) => pollStatus(JSON.parse(res).authIdentifier));
+        }), 'POST').then((res) => {
+            res = JSON.parse(res);
+            callback(res);
+            return pollStatus(res.authIdentifier);
+        });
 
 
     }
