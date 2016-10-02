@@ -69,7 +69,7 @@ export class Application {
 
     initLocalStorage(secret) {
         this._secret = secret;
-        this._storage.setItem("encryptedChallenge", AES.encrypt(this._secretChallenge, this._secret).toString("hex"));
+        this._storage.setItem("encryptedChallenge", AES.encrypt(this._secretChallenge, this._secret).toString());
     }
 
     sendToEstonianIdCode(idCode, amount, ref) {
