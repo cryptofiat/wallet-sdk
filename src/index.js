@@ -54,6 +54,11 @@ export class Application {
         return !!this._secret
     }
 
+    initiated() {
+        if (!this._storage) throw "Storage has not been initiated.";
+        return !!this._storage.getItem("encryptedChallenge");
+    }
+
     unlock(secret) {
         if (AES.decrypt(this._storage.getItem("encryptedChallenge"), secret) == this._secretChallenge) {
             this._secret = secret;
@@ -201,10 +206,36 @@ export class Application {
     }
 
     contractDataByAddressAsync(address) {
-        //TODO: call wallet.euro2.ee:8080/vi/get/delegateNonce for the address
+        //TODO: 
         return Utils.xhrPromise(this.WALLET_SERVER+"accounts/"+address).then( (response) => {
 		return JSON.parse(response)
 	} );
+    }
+
+    transactionsByAddressAsync(address) {
+        //TODO: 
+        return Utils.xhrPromise(this.WALLET_SERVER+"accounts/"+address+"/transactions").then( (response) => {
+		return JSON.parse(response)
+	} );
+    }
+
+    transactionsAsync() {
+
+        let _addresses = this.addresses();
+
+        let addressPromiseArray = _addresses.map((addr) => {
+            return this.transactionsAsync(addr).then( (parsedResponse) => {
+                return {
+		    address: addr,
+                    sourceAccount: parsedResponse.sourceAccount,
+                    targetAccount: parsedResponse.targetAccount,
+                    transactionHash: parsedResponse.approved // move to parsedResponse.transactionHash;
+                }
+            })
+        });
+
+        return Promise.all(addressPromiseArray)
+
     }
 
     contractDataAsync() {
