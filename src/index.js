@@ -60,7 +60,7 @@ export class Application {
     }
 
     unlock(secret) {
-        if (AES.decrypt(this._storage.getItem("encryptedChallenge"), secret) == this._secretChallenge) {
+        if (AES.decrypt(this._storage.getItem("encryptedChallenge"), secret).toString(Utf8) == this._secretChallenge) {
             this._secret = secret;
             return true;
         }
@@ -69,7 +69,7 @@ export class Application {
 
     initLocalStorage(secret) {
         this._secret = secret;
-        this._storage.setItem("encryptedChallenge", AES.encrypt(this._secretChallenge, this._secret));
+        this._storage.setItem("encryptedChallenge", AES.encrypt(this._secretChallenge, this._secret).toString());
     }
 
     sendToEstonianIdCode(idCode, amount, ref) {
@@ -328,7 +328,7 @@ export class Application {
         let pollStatus = (authIdentifier) => Utils.xhrPromise(idServerUrl + '/v1/accounts', {
             authIdentifier: authIdentifier
         }, 'POST').then((res) => {
-            res = JSON.parse(res)
+            res = JSON.parse(res);
             switch (res.authenticationStatus) {
                 case 'LOGIN_SUCCESS':
                     return res;
