@@ -35,6 +35,10 @@ export class Application {
         return _keys.map((k) => eth.bufferToHex(pubToAddress(privateToPublic(k))))
     }
 
+    pubToAddress(pubKey){
+        return pubToAddress(pubKey)
+    }
+
     storeNewKey(newKeyHex) {
         // if newKeyHex is applied, then it is added, otherwise new key generated
 
