@@ -327,15 +327,14 @@ export class Application {
 
 
     approveWithEstonianMobileId(address, phonenumber, callback) {
-        let idServerUrl = 'http://id.euro2.ee:8080';
 
-        let pollStatus = (authIdentifier) => Utils.xhrPromise(idServerUrl + '/v1/accounts', JSON.stringify({
+        let pollStatus = (authIdentifier) => Utils.xhrPromise(this.ID_SERVER + 'accounts', JSON.stringify({
             authIdentifier: authIdentifier
         }), 'POST').then((res) => {
             res = JSON.parse(res);
             switch (res.authenticationStatus) {
                 case 'LOGIN_SUCCESS':
-                    return res;
+                    return res.ownerId;
                     break;
                 case 'LOGIN_EXPIRED':
                 case 'LOGIN_FAILURE':
@@ -348,7 +347,7 @@ export class Application {
             }
         });
 
-        return Utils.xhrPromise(idServerUrl + '/v1/authorisations', JSON.stringify({
+        return Utils.xhrPromise(this.ID_SERVER + 'authorisations', JSON.stringify({
             accountAddress: address,
             phoneNumber: phonenumber
         }), 'POST').then((res) => {
