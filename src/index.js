@@ -85,19 +85,21 @@ export class Application {
 
         return this.getAddressForEstonianIdCode(idCode).then((toaddr) => {
 
+            console.log("sending to: "+toaddr)
             if (!toaddr) return;
 
             return this.contractDataAsync().then((bal) => {
                 //let sentAmount = 0;
 
-                for (data in bal) {
-                    console.log("Balance of", data.address, " ", data.balance);
-                    if (data.balance > this.getFee() + amount) {
-                        return this.sendAsync(toaddr, amount, ref, data);
+                for (var i in bal) {
+		    let account = bal[i];
+                    console.log("Balance of ", account.address, " is ", account.balance);
+                    if (account.balance > this.getFee() + amount) {
+                        return this.sendAsync(toaddr, amount, ref, account);
                         //return true;
                     }
                 }
-                ;
+                return false;
 
             });
         });
@@ -388,8 +390,8 @@ export function pubToAddress(publicKey) {
 }
 
 
-/*
 
+/*
 
  var app = new Application();
  app.attachStorage(window.localStorage);
@@ -398,8 +400,8 @@ export function pubToAddress(publicKey) {
  var addr = app.storeNewKey();
  app.storeNewKey("0x0faf1af8b4cbeadb3b8fc2c2dfa2e3642575cd0c166cda731738227371768595");
  var addrs = app.addresses();
- app.storeEstonianIdCode("2323");
- app.storeEstonianIdCode("4323");
+ app.sendToEstonianIdCode(38008030265,7,"abv").then( (data) => console.log("final out: ",data)).catch( (err) => {console.log("we failed ",err)} )
+ //app.getAddressForEstonianIdCode(38008030265).then( (data) => console.log("address out: ",data))
  //console.log(addrs);
  //console.log(app.balances());
  //console.log(app.sendToEstonianIdCode(3909323,3.22,""));
