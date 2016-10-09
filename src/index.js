@@ -293,10 +293,10 @@ export class Application {
             if (parseInt(currentIdCode) != parseInt(idCode)) {
                 // we're in trouble - he had another ID code before
                 return false;
-            } else {
+            } 
+        } else {
                 this._storage.setItem("EstonianIdCode", idCode);
                 return true;
-            }
         }
     }
 
@@ -398,6 +398,8 @@ export function pubToAddress(publicKey) {
  var addr = app.storeNewKey();
  app.storeNewKey("0x0faf1af8b4cbeadb3b8fc2c2dfa2e3642575cd0c166cda731738227371768595");
  var addrs = app.addresses();
+ app.storeEstonianIdCode("2323");
+ app.storeEstonianIdCode("4323");
  //console.log(addrs);
  //console.log(app.balances());
  //console.log(app.sendToEstonianIdCode(3909323,3.22,""));

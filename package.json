@@ -4,7 +4,7 @@
   "scripts": {
     "webpack-dev-server": "webpack-dev-server",
     "webpack": "webpack",
-    "start": "webpack-dev-server --hot --inline --colors --content-base www/ --port 8080"
+    "start": "webpack-dev-server --hot --inline --colors --content-base ./ --port 8080"
   },
   "dependencies": {
     "ethereumjs-util": "^4.5.0"
