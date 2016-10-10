@@ -119,7 +119,7 @@ export class Application {
     uint256Hex(_number) {
         //convert to hex of uint256
         var zeros32 = "0000000000000000000000000000000000000000000000000000000000000000"
-        var hex = "" + _number.toString(16).slice(2)
+        var hex = "" + _number.toString(16)
         var padded = zeros32.substring(0, zeros32.length - hex.length) + hex
         return padded;
     };
@@ -134,14 +134,19 @@ export class Application {
         let nonce = _data.nonce + 1;
         let fee = this.getFee();
 
+        let shainput = "0x";
+	shainput = shainput.concat(
+            this.uint256Hex(nonce),
+            toaddr,
+            this.uint256Hex(amount),
+            this.uint256Hex(fee)
+        );
+
+        let sha = eth.sha3(shainput);
+
+
         // create a signed transfer
-        let ec2 = eth.ecsign(eth.sha3("0x"
-            + _data.address
-            + toaddr
-            + this.uint256Hex(amount)
-            + this.uint256Hex(fee)
-            + this.uint256Hex(nonce)
-        ), _data.privKey);
+        let ec2 = eth.ecsign(sha, _data.privKey);
 
         // signature can be copied from here to the mist browser and executed from there
         /*
@@ -169,19 +174,22 @@ export class Application {
             "fee": fee,
             "nonce": nonce,
             "reference": "",
-            "sourceAccount": "0x" + _data.address,
+            "sourceAccount": _data.address,
             "targetAccount": "0x" + toaddr,
+            "sig-r": eth.bufferToHex(ec2.r),
+            "sig-s": eth.bufferToHex(ec2.s),
+            "sig-v": eth.bufferToHex(ec2.v),
             "signature": eth.bufferToHex(ec2.r)
-            + eth.bufferToHex(ec2.s) + ec2.v
+            + eth.bufferToHex(ec2.s).slice(2) + ec2.v.toString(16)
         };
-        // console.log(postData);
-        // console.log(JSON.stringify(postData));
+        console.log("postData: ", postData);
+        //console.log(JSON.stringify(postData));
 
-        return Utils.xhrPromise(this.WALLET_SERVER + "sendDelegated", postData, "POST").then((response) => {
+        /*
+        return Utils.xhrPromise(this.WALLET_SERVER + "transfers", postData, "POST").then((response) => {
             return JSON.parse(response)
         });
 
-        /*
          Utils.xhr(EtheriumService.GATEWAY_URL + '/v1/transfers', JSON.stringify(postData), (res)=> {
          var data = JSON.parse(res);
          console.log('Transfer hash:', data.id);
@@ -208,7 +216,7 @@ export class Application {
         // var promise = Utils.xhrPromise(this.WALLET_SERVER+"fees");
         // return promise
 
-        return 0.01;
+        return 1;
     }
 
     contractDataByAddressAsync(address) {
@@ -390,17 +398,16 @@ export function pubToAddress(publicKey) {
 }
 
 
-
 /*
-
  var app = new Application();
  app.attachStorage(window.localStorage);
  app.initLocalStorage("mypass");
  console.log("Unlocked? ",app.isUnlocked());
- var addr = app.storeNewKey();
- app.storeNewKey("0x0faf1af8b4cbeadb3b8fc2c2dfa2e3642575cd0c166cda731738227371768595");
+// var addr = app.storeNewKey();
+// app.storeNewKey("0x0fa27371768595");
  var addrs = app.addresses();
- app.sendToEstonianIdCode(38008030265,7,"abv").then( (data) => console.log("final out: ",data)).catch( (err) => {console.log("we failed ",err)} )
+ app.sendToEstonianIdCode(38008030265,3,"abv").then( (data) => console.log("final out: ",data)).catch( (err) => {console.log("we failed ",err)} )
+
  //app.getAddressForEstonianIdCode(38008030265).then( (data) => console.log("address out: ",data))
  //console.log(addrs);
  //console.log(app.balances());
