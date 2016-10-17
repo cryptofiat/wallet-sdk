@@ -227,30 +227,46 @@ export class Application {
         });
     }
 
-    transactionsByAddressAsync(address) {
+    transfersByAddressAsync(address) {
         //TODO:
-        return Utils.xhrPromise(this.WALLET_SERVER+"accounts/"+address+"/transactions").then( (response) => {
+        return Utils.xhrPromise(this.WALLET_SERVER+"accounts/"+address+"/transfers").then( (response) => {
+		//console.log("some  response: ", JSON.parse(response))
 		return JSON.parse(response)
 	} );
     }
 
-    transactionsAsync() {
+    transfersAsync() {
 
         let _addresses = this.addresses();
 
         let addressPromiseArray = _addresses.map((addr) => {
-            return this.transactionsAsync(addr).then( (parsedResponse) => {
-                return {
+            return this.transfersByAddressAsync(addr).then( (transferArray) => { return transferArray.map((parsedResponse) => {
+                if (parsedResponse.sourceAccount != parsedResponse.targetAccount) { return {
 		    address: addr,
+		    amount: parsedResponse.amount,
                     sourceAccount: parsedResponse.sourceAccount,
                     targetAccount: parsedResponse.targetAccount,
-                    transactionHash: parsedResponse.approved // move to parsedResponse.transactionHash;
-                }
-            })
+                    transactionHash: parsedResponse.id, 
+		    timestamp: parsedResponse.timestamp,
+		    otherAddress: (parsedResponse.sourceAccount != addr) ? parsedResponse.sourceAccount : parsedResponse.targetAccount,
+		    signedAmount: (parsedResponse.sourceAccount == addr) ? -parsedResponse.amount : parsedResponse.amount
+               } } 
+            }) })
         });
 
         return Promise.all(addressPromiseArray)
 
+    }
+
+
+    transfersCleanedAsync() {
+      return this.transfersAsync().then( (result) => { 
+         let cleaning = [];
+         result.map((resultel) => { 
+		cleaning = cleaning.concat(resultel);
+         });
+	 return cleaning.filter(Boolean);
+      } );
     }
 
     balanceTotalAsync() {
@@ -398,8 +414,8 @@ export function pubToAddress(publicKey) {
     return eth.pubToAddress(publicKey)
 }
 
-/*
 
+/*
  var app = new Application();
  app.attachStorage(window.localStorage);
  app.initLocalStorage("mypass");
@@ -407,6 +423,10 @@ export function pubToAddress(publicKey) {
 // var addr = app.storeNewKey();
 // app.storeNewKey("0x0fa27371768595");
  var addrs = app.addresses();
+ var cleaning = [];
+ app.transfersCleanedAsync().then( (result) => { 
+    console.log("transfers-el ", result);
+ } ) ;
  app.sendToEstonianIdCode(38008030265,4,"abv").then( (data) => console.log("final out: ",data)).catch( (err) => {console.log("we failed ",err)} )
 
  //app.getAddressForEstonianIdCode(38008030265).then( (data) => console.log("address out: ",data))
