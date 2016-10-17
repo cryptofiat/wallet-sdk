@@ -292,6 +292,7 @@ export class Application {
                 return {
                     address: addr,
                     privKey: key,
+                    privKeyHex: eth.bufferToHex(key),
                     balance: response.balance,
                     nonce: response.nonce,
                     approved: response.approved,
