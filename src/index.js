@@ -176,19 +176,20 @@ export class Application {
             "reference": "",
             "sourceAccount": _data.address,
             "targetAccount": "0x" + toaddr,
-            "sig-r": eth.bufferToHex(ec2.r),
-            "sig-s": eth.bufferToHex(ec2.s),
-            "sig-v": eth.bufferToHex(ec2.v),
-            "signature": eth.bufferToHex(ec2.r)
+//            "sig-r": eth.bufferToHex(ec2.r),
+//            "sig-s": eth.bufferToHex(ec2.s),
+//            "sig-v": eth.bufferToHex(ec2.v),
+	    //TODO: the wallet-server should take the signature hex with 0x
+            "signature": eth.bufferToHex(ec2.r).slice(2)
             + eth.bufferToHex(ec2.s).slice(2) + ec2.v.toString(16)
         };
         console.log("postData: ", postData);
         //console.log(JSON.stringify(postData));
 
-        /*
-        return Utils.xhrPromise(this.WALLET_SERVER + "transfers", postData, "POST").then((response) => {
+        return Utils.xhrPromise(this.WALLET_SERVER + "transfers", JSON.stringify(postData), "POST").then((response) => {
             return JSON.parse(response)
         });
+        /*
 
          Utils.xhr(EtheriumService.GATEWAY_URL + '/v1/transfers', JSON.stringify(postData), (res)=> {
          var data = JSON.parse(res);
@@ -397,8 +398,8 @@ export function pubToAddress(publicKey) {
     return eth.pubToAddress(publicKey)
 }
 
-
 /*
+
  var app = new Application();
  app.attachStorage(window.localStorage);
  app.initLocalStorage("mypass");
@@ -406,7 +407,7 @@ export function pubToAddress(publicKey) {
 // var addr = app.storeNewKey();
 // app.storeNewKey("0x0fa27371768595");
  var addrs = app.addresses();
- app.sendToEstonianIdCode(38008030265,3,"abv").then( (data) => console.log("final out: ",data)).catch( (err) => {console.log("we failed ",err)} )
+ app.sendToEstonianIdCode(38008030265,4,"abv").then( (data) => console.log("final out: ",data)).catch( (err) => {console.log("we failed ",err)} )
 
  //app.getAddressForEstonianIdCode(38008030265).then( (data) => console.log("address out: ",data))
  //console.log(addrs);
