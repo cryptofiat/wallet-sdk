@@ -12,6 +12,7 @@ export class Application {
     constructor() {
         this._secretChallenge = "QUICKBROWNMOOSEJUMPEDOVERTHEFENCEANDBROKEHERLEG"; //some random text would
         this.ID_SERVER = "http://id.euro2.ee:8080/v1/";
+        this.ID_SERVER_HTTPS = "https://id.euro2.ee/v1/";
         this.WALLET_SERVER = "http://wallet.euro2.ee:8080/v1/";
     }
 
@@ -387,11 +388,23 @@ export class Application {
 
     }
 
-    approveWithEstonianIdCard(address, callback) {
-        // use id.euro2.ee but not sure how
-        //
-        // should return IdCode
-        return 38008030332
+    approveWithEstonianIdCard(address) {
+
+        return Utils.xhrPromise(this.ID_SERVER_HTTPS + 'authorisations/idCards', JSON.stringify({
+            accountAddress: address,
+	    phoneNumber: "000000"
+        }), 'POST', true).then((res) => {
+            res = JSON.parse(res);
+            switch (res.authenticationStatus) {
+                case 'LOGIN_SUCCESS':
+                    return res.ownerId;
+                    break;
+                case 'LOGIN_EXPIRED':
+                case 'LOGIN_FAILURE':
+                    return false;
+                    break;
+            }
+        });
     }
 
     approveWithEstonianBankTransfer(address, callback) {
@@ -415,15 +428,19 @@ export function pubToAddress(publicKey) {
     return eth.pubToAddress(publicKey)
 }
 
-
 /*
+
  var app = new Application();
  app.attachStorage(window.localStorage);
  app.initLocalStorage("mypass");
  console.log("Unlocked? ",app.isUnlocked());
 // var addr = app.storeNewKey();
 // app.storeNewKey("0x0fa27371768595");
- var addrs = app.addresses();
+// var addrs = app.addresses();
+console.log("starting");
+ app.approveWithEstonianIdCard("ce8a7f7c35a2829c6554fd38b96a7ff43b0a76d8").then( (id) =>{
+  console.log("received ID: ",id);
+ });
  var cleaning = [];
  app.transfersCleanedAsync().then( (result) => { 
     console.log("transfers-el ", result);
