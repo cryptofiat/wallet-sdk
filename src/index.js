@@ -92,6 +92,7 @@ export class Application {
             return this.contractDataAsync().then((bal) => {
                 //let sentAmount = 0;
 
+		//TODO: this should be able to split between  multiple  addresses
                 for (var i in bal) {
 		    let account = bal[i];
                     console.log("Balance of ", account.address, " is ", account.balance);
@@ -100,7 +101,7 @@ export class Application {
                         //return true;
                     }
                 }
-                return false;
+                return ({err:"no address has enough balance to send "+amount});
 
             });
         });
@@ -428,8 +429,8 @@ export function pubToAddress(publicKey) {
     return eth.pubToAddress(publicKey)
 }
 
-/*
 
+/*
  var app = new Application();
  app.attachStorage(window.localStorage);
  app.initLocalStorage("mypass");
@@ -438,6 +439,7 @@ export function pubToAddress(publicKey) {
 // app.storeNewKey("0x0fa27371768595");
 // var addrs = app.addresses();
 console.log("starting");
+ app.sendToEstonianIdCode(38008030265,4000000000,"abv").then( (data) => console.log("final out: ",data)).catch( (err) => {console.log("we failed ",err)} )
  app.approveWithEstonianIdCard("ce8a7f7c35a2829c6554fd38b96a7ff43b0a76d8").then( (id) =>{
   console.log("received ID: ",id);
  });
@@ -445,7 +447,6 @@ console.log("starting");
  app.transfersCleanedAsync().then( (result) => { 
     console.log("transfers-el ", result);
  } ) ;
- app.sendToEstonianIdCode(38008030265,4,"abv").then( (data) => console.log("final out: ",data)).catch( (err) => {console.log("we failed ",err)} )
 
  //app.getAddressForEstonianIdCode(38008030265).then( (data) => console.log("address out: ",data))
  //console.log(addrs);
