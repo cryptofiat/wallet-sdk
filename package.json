@@ -7,6 +7,7 @@
     "start": "webpack-dev-server --hot --inline --colors --content-base ./ --port 8080"
   },
   "dependencies": {
+    "crypto-js": "^3.1.7",
     "ethereumjs-util": "^4.5.0"
   },
   "devDependencies": {

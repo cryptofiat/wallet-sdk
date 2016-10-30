@@ -413,6 +413,14 @@ export class Application {
 
         return "moose shoes black"
     }
+
+    transferStatusAsync(transactionHash) {
+	// Returns response.status: PENDING or response.status: SUCCESSFUL
+        //TODO: call wallet.euro2.ee:8080/vi/get/delegateNonce for the address
+        return Utils.xhrPromise(this.WALLET_SERVER + "transfers/" + transactionHash).then((response) => {
+            return JSON.parse(response)
+        });
+    }
 }
 
 export function generatePrivate() {
