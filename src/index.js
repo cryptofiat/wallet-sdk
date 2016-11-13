@@ -14,6 +14,7 @@ export class Application {
         this.ID_SERVER = "http://id.euro2.ee:8080/v1/";
         this.ID_SERVER_HTTPS = "https://id.euro2.ee/v1/";
         this.WALLET_SERVER = "http://wallet.euro2.ee:8080/v1/";
+        this.REF_SERVER = "http://wallet.euro2.ee:8000/";
     }
 
     attachStorage(storage) {
@@ -421,6 +422,24 @@ export class Application {
             return JSON.parse(response)
         });
     }
+
+    referenceSendAsync(transactionHash,senderIdCode,receiverIdCode,referenceText,referenceCode,attachments) {
+        let postRef = {};
+	postRef.senderIdCode = senderIdCode;
+	postRef.receiverIdCode = receiverIdCode;
+	postRef.referenceText = referenceText;
+	postRef.referenceCode = referenceCode;
+        return Utils.xhrPromise(this.REF_SERVER + transactionHash, JSON.stringify(postRef), "POST").then((response) => {
+            return true; 
+        });
+    }
+
+    referenceAsync(transactionHash) {
+        return Utils.xhrPromise(this.REF_SERVER + transactionHash).then((response) => {
+            return JSON.parse(response)
+        });
+    }
+
 }
 
 export function generatePrivate() {
@@ -440,6 +459,11 @@ export function pubToAddress(publicKey) {
 
 /*
  var app = new Application();
+ app.referenceSendAsync("cf36f36b5ed7f84a764671c4a7ef81380e7fadcaea2014c1f0b0963bac6fae00","38008030265","48308260321","for milk","")
+ .then( () => {
+   app.referenceAsync("cf36f36b5ed7f84a764671c4a7ef81380e7fadcaea2014c1f0b0963bac6fae00").then((r) => {console.log("response: ",r)})
+  
+ })
  app.attachStorage(window.localStorage);
  app.initLocalStorage("mypass");
  console.log("Unlocked? ",app.isUnlocked());
