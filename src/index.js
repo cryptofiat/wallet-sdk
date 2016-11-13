@@ -445,7 +445,7 @@ export class Application {
     referenceAsync(transactionHash) {
         return Utils.xhrPromise(this.REF_SERVER + transactionHash).then((response) => {
             return JSON.parse(response)
-        });
+        }, (err) => { console.log("No  reference for ",transactionHash); return {}; } );
     }
 
 }
