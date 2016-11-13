@@ -268,7 +268,15 @@ export class Application {
          result.map((resultel) => { 
 		cleaning = cleaning.concat(resultel);
          });
-	 return cleaning.filter(Boolean);
+
+	 // read references for these transactions
+	 let cleanedAndReferenced = cleaning.filter(Boolean).map( (tx) => {
+             return this.referenceAsync(stripHexPrefix(tx.transactionHash)).then( (ref) => {
+		 tx.ref = ref;
+                 return tx;
+             });
+	 });
+         return Promise.all(cleanedAndReferenced);
       } );
     }
 
@@ -454,6 +462,10 @@ export function privateToPublic(privateKey) {
 
 export function pubToAddress(publicKey) {
     return eth.pubToAddress(publicKey)
+}
+
+export function stripHexPrefix(str) {
+    return eth.stripHexPrefix(str)
 }
 
 
