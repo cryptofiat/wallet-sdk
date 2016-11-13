@@ -271,8 +271,9 @@ export class Application {
 
 	 // read references for these transactions
 	 let cleanedAndReferenced = cleaning.filter(Boolean).map( (tx) => {
-             return this.referenceAsync(stripHexPrefix(tx.transactionHash)).then( (ref) => {
+             return this.referenceAsync(tx.transactionHash).then( (ref) => {
 		 tx.ref = ref;
+		 tx.counterPartyIdCode (tx.signedAmount < 0) ? ref.receiverIdCode : ref.senderIdCode;
                  return tx;
              });
 	 });
@@ -437,13 +438,13 @@ export class Application {
 	postRef.receiverIdCode = receiverIdCode;
 	postRef.referenceText = referenceText;
 	postRef.referenceCode = referenceCode;
-        return Utils.xhrPromise(this.REF_SERVER + transactionHash, JSON.stringify(postRef), "POST").then((response) => {
+        return Utils.xhrPromise(this.REF_SERVER + stripHexPrefix(transactionHash), JSON.stringify(postRef), "POST").then((response) => {
             return true; 
         });
     }
 
     referenceAsync(transactionHash) {
-        return Utils.xhrPromise(this.REF_SERVER + transactionHash).then((response) => {
+        return Utils.xhrPromise(this.REF_SERVER + stripHexPrefix(transactionHash)).then((response) => {
             return JSON.parse(response)
         }, (err) => { console.log("No  reference for ",transactionHash); return {}; } );
     }
