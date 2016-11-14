@@ -99,7 +99,10 @@ export class Application {
                     console.log("Balance of ", account.address, " is ", account.balance);
                     if (account.balance > this.getFee() + amount) {
                         return this.sendAsync(toaddr, amount, ref, account).then( (res) => {
-	                   this.referenceSendAsync(res.id,this.getEstonianIdCode,idCode,ref).resolve();
+	                   this.referenceSendAsync(res.id,this.getEstonianIdCode(),idCode,ref).then(
+				() => { console.log("References submitted for ", res.id) },
+			        (err) => { console.log("Reference submission failed with error: ", err) }
+			   );
 			   return res;
                         })
                         //return true;
