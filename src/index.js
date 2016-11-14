@@ -98,7 +98,10 @@ export class Application {
 		    let account = bal[i];
                     console.log("Balance of ", account.address, " is ", account.balance);
                     if (account.balance > this.getFee() + amount) {
-                        return this.sendAsync(toaddr, amount, ref, account);
+                        return this.sendAsync(toaddr, amount, ref, account).then( (res) => {
+	                   this.referenceSendAsync(res.id,this.getEstonianIdCode,idCode,ref).resolve();
+			   return res;
+                        })
                         //return true;
                     }
                 }
@@ -190,7 +193,7 @@ export class Application {
         //console.log(JSON.stringify(postData));
 
         return Utils.xhrPromise(this.WALLET_SERVER + "transfers", JSON.stringify(postData), "POST").then((response) => {
-            return JSON.parse(response)
+	    return JSON.parse(response);
         });
         /*
 
