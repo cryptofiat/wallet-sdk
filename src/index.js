@@ -257,6 +257,7 @@ export class Application {
                     targetAccount: parsedResponse.targetAccount,
                     transactionHash: parsedResponse.id, 
 		    timestamp: parsedResponse.timestamp,
+		    fee: parsedResponse.fee,
 		    otherAddress: (parsedResponse.sourceAccount != addr) ? parsedResponse.sourceAccount : parsedResponse.targetAccount,
 		    signedAmount: (parsedResponse.sourceAccount == addr) ? -parsedResponse.amount : parsedResponse.amount
                } } 
