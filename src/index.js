@@ -456,6 +456,12 @@ export class Application {
         }, (err) => { console.log("No  reference for ",transactionHash); return {}; } );
     }
 
+    nameFromIdAsync(idCode) {
+        return Utils.xhrPromise(this.ID_SERVER + "/ldap/" + idCode).then((response) => {
+            return JSON.parse(response)
+        }, (err) => { console.log("Not valid id code ",idCOde); return {}; } );
+    }
+
 }
 
 export function generatePrivate() {
