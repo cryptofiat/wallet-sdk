@@ -281,9 +281,16 @@ export class Application {
              return this.referenceAsync(tx.transactionHash).then( (ref) => {
 		 tx.ref = ref;
 		 tx.counterPartyIdCode = (tx.signedAmount < 0) ? ref.receiverIdCode : ref.senderIdCode;
-                 return tx;
-             });
-	 });
+		 if (!tx.counterPartyIdCode) { return tx; }
+                 return this.nameFromIdAsync(tx.counterPartyIdCode).then( (names) => {
+		     if (names.idCode) {
+			 tx.counterPartyFirstName = names.firstName;
+			 tx.counterPartyLastName = names.lastName;
+		     }
+		     return tx;
+	         }, (err) => {return tx;} );
+	     });
+	  });
          return Promise.all(cleanedAndReferenced);
       } );
     }
