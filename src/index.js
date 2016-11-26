@@ -96,7 +96,7 @@ export class Application {
 		//TODO: this should be able to split between  multiple  addresses
                 for (var i in bal) {
 		    let account = bal[i];
-                    console.log("Balance of ", account.address, " is ", account.balance);
+                    //console.log("Balance of ", account.address, " is ", account.balance);
                     if (account.balance > this.getFee() + amount) {
                         return this.sendAsync(toaddr, amount, ref, account).then( (res) => {
 	                   this.referenceSendAsync(res.id,this.getEstonianIdCode(),idCode,ref).then(
@@ -143,7 +143,7 @@ export class Application {
                     //console.log("Balance of ", account.address, " is ", account.balance);
                     if (account.balance > this.getBankFee() + amount) {
                         return this.sendToBankAsync(toIBAN, amount, ref, recipientName, account).then( (res) => {
-	                   this.referenceSendAsync(res.id,this.getEstonianIdCode(),toIBAN,ref).then(
+	                   this.referenceSendAsync(res.id,this.getEstonianIdCode(),,ref,,toIBAN,recipientName).then(
 				() => { console.log("References submitted for ", res.id) },
 			        (err) => { console.log("Reference submission failed with error: ", err) }
 			   );
@@ -497,10 +497,13 @@ export class Application {
         });
     }
 
-    referenceSendAsync(transactionHash,senderIdCode,receiverIdCode,referenceText,referenceCode,attachments) {
+    //TODO: maybe there should be different methods for Bank and Eth transfers
+    referenceSendAsync(transactionHash,senderIdCode,receiverIdCode,referenceText,referenceCode,receiverIBAN,recipientName,attachments) {
         let postRef = {};
 	postRef.senderIdCode = senderIdCode;
 	postRef.receiverIdCode = receiverIdCode;
+	postRef.receiverIBAN = receiverIBAN;
+	postRef.recipientName = recipientName;
 	postRef.referenceText = referenceText;
 	postRef.referenceCode = referenceCode;
         return Utils.xhrPromise(this.REF_SERVER + stripHexPrefix(transactionHash), JSON.stringify(postRef), "POST").then((response) => {
