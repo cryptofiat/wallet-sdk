@@ -157,7 +157,7 @@ export class Application {
             });
     }
 
-
+    //TODO: this should be structured better with sendAsync()
     sendToBankAsync(toIBAN, amount, ref, _data) {
 
         let nonce = _data.nonce + 1;
@@ -540,6 +540,7 @@ export function stripHexPrefix(str) {
 }
 
 
+/*
  var app = new Application();
  app.attachStorage(window.localStorage);
  app.initLocalStorage("mypass");
@@ -549,7 +550,6 @@ export function stripHexPrefix(str) {
 // var addrs = app.addresses();
 console.log("starting");
  app.findAccountAndSendToBank("EE110232000123",4,"abv").then( (data) => console.log("final out: ",data)).catch( (err) => {console.log("we failed ",err)} )
-/*
  app.approveWithEstonianIdCard("ce8a7f7c35a2829c6554fd38b96a7ff43b0a76d8").then( (id) =>{
   console.log("received ID: ",id);
  });
