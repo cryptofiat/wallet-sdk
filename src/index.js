@@ -133,16 +133,16 @@ export class Application {
         return padded;
     };
 
-    findAccountAndSendToBank(toIBAN, amount, ref) {
+    findAccountAndSendToBank(toIBAN, amount, ref, recipientName) {
 
             return this.contractDataAsync().then((bal) => {
 
 		//TODO: this should be able to split between  multiple  addresses
                 for (var i in bal) {
 		    let account = bal[i];
-                    console.log("Balance of ", account.address, " is ", account.balance);
+                    //console.log("Balance of ", account.address, " is ", account.balance);
                     if (account.balance > this.getBankFee() + amount) {
-                        return this.sendToBankAsync(toIBAN, amount, ref, account).then( (res) => {
+                        return this.sendToBankAsync(toIBAN, amount, ref, recipientName, account).then( (res) => {
 	                   this.referenceSendAsync(res.id,this.getEstonianIdCode(),toIBAN,ref).then(
 				() => { console.log("References submitted for ", res.id) },
 			        (err) => { console.log("Reference submission failed with error: ", err) }
@@ -158,7 +158,7 @@ export class Application {
     }
 
     //TODO: this should be structured better with sendAsync()
-    sendToBankAsync(toIBAN, amount, ref, _data) {
+    sendToBankAsync(toIBAN, amount, ref, recipientName, _data) {
 
         let nonce = _data.nonce + 1;
         let fee = this.getBankFee();
@@ -182,6 +182,7 @@ export class Application {
             "fee": fee,
             "nonce": nonce,
             "reference": ref,
+            "recipientName": recipientName,
             "sourceAccount": _data.address,
             "targetAccount": "0x" + toaddr,
             "targetBankAccountIBAN": toIBAN,
