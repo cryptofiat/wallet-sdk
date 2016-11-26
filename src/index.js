@@ -133,6 +133,67 @@ export class Application {
         return padded;
     };
 
+    findAccountAndSendToBank(toIBAN, amount, ref) {
+
+            return this.contractDataAsync().then((bal) => {
+
+		//TODO: this should be able to split between  multiple  addresses
+                for (var i in bal) {
+		    let account = bal[i];
+                    console.log("Balance of ", account.address, " is ", account.balance);
+                    if (account.balance > this.getBankFee() + amount) {
+                        return this.sendToBankAsync(toIBAN, amount, ref, account).then( (res) => {
+	                   this.referenceSendAsync(res.id,this.getEstonianIdCode(),toIBAN,ref).then(
+				() => { console.log("References submitted for ", res.id) },
+			        (err) => { console.log("Reference submission failed with error: ", err) }
+			   );
+			   return res;
+                        })
+                        //return true;
+                    }
+                }
+                return ({err:"no address has enough balance to send "+amount});
+
+            });
+    }
+
+
+    sendToBankAsync(toIBAN, amount, ref, _data) {
+
+        let nonce = _data.nonce + 1;
+        let fee = this.getBankFee();
+	let toaddr = this.getBankProxyAddress();
+
+        let shainput = "0x";
+	shainput = shainput.concat(
+            this.uint256Hex(nonce),
+            toaddr,
+            this.uint256Hex(amount),
+            this.uint256Hex(fee)
+        );
+
+        let sha = eth.sha3(shainput);
+
+        // create a signed transfer
+        let ec2 = eth.ecsign(sha, _data.privKey);
+
+        var postData = {
+            "amount": amount,
+            "fee": fee,
+            "nonce": nonce,
+            "reference": ref,
+            "sourceAccount": _data.address,
+            "targetAccount": "0x" + toaddr,
+            "targetBankAccountIBAN": toIBAN,
+            "signature": eth.bufferToHex(ec2.r).slice(2)
+            + eth.bufferToHex(ec2.s).slice(2) + ec2.v.toString(16)
+        };
+        console.log("postData: ", postData);
+
+        return Utils.xhrPromise(this.WALLET_SERVER + "transfers/bank", JSON.stringify(postData), "POST").then((response) => {
+	    return JSON.parse(response);
+        });
+    };
 
     sendAsync(toaddr, amount, ref, _data) {
         // the piecemeal lower level send
@@ -152,7 +213,6 @@ export class Application {
         );
 
         let sha = eth.sha3(shainput);
-
 
         // create a signed transfer
         let ec2 = eth.ecsign(sha, _data.privKey);
@@ -185,9 +245,6 @@ export class Application {
             "reference": "",
             "sourceAccount": _data.address,
             "targetAccount": "0x" + toaddr,
-//            "sig-r": eth.bufferToHex(ec2.r),
-//            "sig-s": eth.bufferToHex(ec2.s),
-//            "sig-v": eth.bufferToHex(ec2.v),
 	    //TODO: the wallet-server should take the signature hex with 0x
             "signature": eth.bufferToHex(ec2.r).slice(2)
             + eth.bufferToHex(ec2.s).slice(2) + ec2.v.toString(16)
@@ -198,24 +255,6 @@ export class Application {
         return Utils.xhrPromise(this.WALLET_SERVER + "transfers", JSON.stringify(postData), "POST").then((response) => {
 	    return JSON.parse(response);
         });
-        /*
-
-         Utils.xhr(EtheriumService.GATEWAY_URL + '/v1/transfers', JSON.stringify(postData), (res)=> {
-         var data = JSON.parse(res);
-         console.log('Transfer hash:', data.id);
-         if (parseInt(data.id,16) == 0) {
-         console.log("Submit failed by wallet-server. Check if account unlocked and sufficient eth.");
-         document.querySelector("#status-data").innerHTML = "Submit failed on server.";
-         } else {
-         document.querySelector("#status-data").innerHTML = 'Submitted <a href=https://etherscan.io/tx/"'+data.id+'">tx</a>';
-         }
-         },'POST', (err) => {
-         document.querySelector("#status-data").innerHTML = "Server rejected submit.";
-         console.log(err);
-         });
-         }
-         */
-
 
     }
 
@@ -227,6 +266,17 @@ export class Application {
         // return promise
 
         return 1;
+    }
+
+    getBankFee() {
+
+        return 5;
+    }
+
+    getBankProxyAddress() {
+	//TODO: read from wallet server
+        // wallet-server return "8664e7a68809238d8f8e78e4b7c723282533a787";
+        return "833898875a12a3d61ef18dc3d2b475c7ca3a4a72";
     }
 
     contractDataByAddressAsync(address) {
@@ -490,13 +540,7 @@ export function stripHexPrefix(str) {
 }
 
 
-/*
  var app = new Application();
- app.referenceSendAsync("cf36f36b5ed7f84a764671c4a7ef81380e7fadcaea2014c1f0b0963bac6fae00","38008030265","48308260321","for milk","")
- .then( () => {
-   app.referenceAsync("cf36f36b5ed7f84a764671c4a7ef81380e7fadcaea2014c1f0b0963bac6fae00").then((r) => {console.log("response: ",r)})
-  
- })
  app.attachStorage(window.localStorage);
  app.initLocalStorage("mypass");
  console.log("Unlocked? ",app.isUnlocked());
@@ -504,10 +548,16 @@ export function stripHexPrefix(str) {
 // app.storeNewKey("0x0fa27371768595");
 // var addrs = app.addresses();
 console.log("starting");
- app.sendToEstonianIdCode(38008030265,4000000000,"abv").then( (data) => console.log("final out: ",data)).catch( (err) => {console.log("we failed ",err)} )
+ app.findAccountAndSendToBank("EE110232000123",4,"abv").then( (data) => console.log("final out: ",data)).catch( (err) => {console.log("we failed ",err)} )
+/*
  app.approveWithEstonianIdCard("ce8a7f7c35a2829c6554fd38b96a7ff43b0a76d8").then( (id) =>{
   console.log("received ID: ",id);
  });
+ app.referenceSendAsync("cf36f36b5ed7f84a764671c4a7ef81380e7fadcaea2014c1f0b0963bac6fae00","38008030265","48308260321","for milk","")
+ .then( () => {
+   app.referenceAsync("cf36f36b5ed7f84a764671c4a7ef81380e7fadcaea2014c1f0b0963bac6fae00").then((r) => {console.log("response: ",r)})
+  
+ })
  var cleaning = [];
  app.transfersCleanedAsync().then( (result) => { 
     console.log("transfers-el ", result);
