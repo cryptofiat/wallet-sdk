@@ -143,7 +143,7 @@ export class Application {
                     //console.log("Balance of ", account.address, " is ", account.balance);
                     if (account.balance > this.getBankFee() + amount) {
                         return this.sendToBankAsync(toIBAN, amount, ref, recipientName, account).then( (res) => {
-	                   this.referenceSendAsync(res.id,this.getEstonianIdCode(),,ref,,toIBAN,recipientName).then(
+	                   this.referenceSendAsync(res.id,this.getEstonianIdCode(),null,ref,null,toIBAN,recipientName).then(
 				() => { console.log("References submitted for ", res.id) },
 			        (err) => { console.log("Reference submission failed with error: ", err) }
 			   );
