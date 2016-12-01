@@ -458,7 +458,7 @@ export class Application {
             res = JSON.parse(res);
             switch (res.authenticationStatus) {
                 case 'LOGIN_SUCCESS':
-                    return res.ownerId;
+                    return { ownerId: res.ownerId, transactionHash: res.transactionHash };
                     break;
                 case 'LOGIN_EXPIRED':
                 case 'LOGIN_FAILURE':
@@ -492,7 +492,7 @@ export class Application {
             res = JSON.parse(res);
             switch (res.authenticationStatus) {
                 case 'LOGIN_SUCCESS':
-                    return res.ownerId;
+                    return { ownerId: res.ownerId, transactionHash: res.transactionHash };
                     break;
                 case 'LOGIN_EXPIRED':
                 case 'LOGIN_FAILURE':
