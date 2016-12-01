@@ -22,6 +22,23 @@ export class Application {
         return this;
     }
 
+    // for holding password
+    attachSessionStorage(storage) {
+        this._sessionStorage = storage;
+        return this;
+    }
+
+    logout() {
+       delete this._secret;
+       this._sessionStorage.setItem("secret",null); 
+    }
+
+    getSecret() {
+       if (!this._secret) { 
+          this._secret = this._sessionStorage.getItem("secret"); 
+       }
+       return this._secret;
+    }
 
     keys() {
         if (!this.isUnlocked()) {
@@ -29,7 +46,7 @@ export class Application {
         }
 
         let _enckeys = JSON.parse(this._storage.getItem("keys"));
-        return _enckeys.map((k) => eth.toBuffer("0x" + AES.decrypt(k, this._secret).toString(Utf8)))
+        return _enckeys.map((k) => eth.toBuffer("0x" + AES.decrypt(k, this.getSecret()).toString(Utf8)))
     }
 
     addresses() {
@@ -50,14 +67,14 @@ export class Application {
         let keysArray = JSON.parse(this._storage.getItem("keys")) || [];
         let newPriv = newKeyHex ? eth.toBuffer(newKeyHex) : generatePrivate();
 
-        let encryptedKey = AES.encrypt(newPriv.toString("hex"), this._secret);
+        let encryptedKey = AES.encrypt(newPriv.toString("hex"), this.getSecret());
         keysArray.push(encryptedKey.toString());
         this._storage.setItem("keys", JSON.stringify(keysArray));
         return privateToPublic(newPriv);
     }
 
     isUnlocked() {
-        return !!this._secret
+        return !!(this.getSecret());
     }
 
     initiated() {
@@ -68,6 +85,7 @@ export class Application {
     unlock(secret) {
         if (AES.decrypt(this._storage.getItem("encryptedChallenge"), secret).toString(Utf8) == this._secretChallenge) {
             this._secret = secret;
+            this._sessionStorage.setItem("secret",secret);
             return true;
         }
         return false;
@@ -75,6 +93,7 @@ export class Application {
 
     initLocalStorage(secret) {
         this._secret = secret;
+        this._sessionStorage.setItem("secret",secret);
         this._storage.setItem("encryptedChallenge", AES.encrypt(this._secretChallenge, this._secret).toString());
     }
 
