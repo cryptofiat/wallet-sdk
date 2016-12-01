@@ -539,7 +539,7 @@ export class Application {
     nameFromIdAsync(idCode) {
         return Utils.xhrPromise(this.ID_SERVER + "/ldap/" + idCode).then((response) => {
             return JSON.parse(response)
-        }, (err) => { console.log("Not valid id code ",idCOde); return {}; } );
+        }, (err) => { console.log("Not valid id code ",idCode); return {}; } );
     }
 
 }
