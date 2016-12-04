@@ -1,6 +1,7 @@
 {
   "name": "cryptofiat-wallet",
   "version": "0.1.0",
+  "main": "bundle.js",
   "scripts": {
     "webpack-dev-server": "webpack-dev-server",
     "webpack": "webpack",

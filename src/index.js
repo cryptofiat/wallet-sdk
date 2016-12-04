@@ -619,6 +619,7 @@ export function stripHexPrefix(str) {
 /*
  var app = new Application();
  app.attachStorage(window.localStorage);
+ app.pending.getTotalPending();
  app.testSignature(3,0,"65fa6548764c08c0dd77495b33ed302d0c212691",1)
  app.initLocalStorage("mypass");
  console.log("Unlocked? ",app.isUnlocked());
