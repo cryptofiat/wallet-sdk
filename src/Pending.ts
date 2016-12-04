@@ -13,6 +13,14 @@ export default class Pending {
       let storedTransfers : Array<Transfer>;
       storedTransfers = this.getPendingTransfers();
       if (storedTransfers == null ) {storedTransfers = []}
+      // Some checks on the object
+      if (!tx.signedAmount && tx.amount) { 
+          //TODO: just assuming it is inbound escrow then
+          tx.signedAmount = tx.amount; 
+      }
+      if (tx.ref == undefined) { 
+	  tx.ref = new  TransferReference();
+      }
       storedTransfers.push(tx);
       storedJson = JSON.stringify(storedTransfers);
       this.storage.setItem("pendingTransfers",storedJson);
@@ -37,6 +45,6 @@ export default class Pending {
 
   public getPendingTotal() : number {
       if (this.getPendingTransfers().length == 0) return 0;
-      return this.getPendingTransfers().map( (tx) => (tx.fee ? tx.fee : 0) + tx.amount).reduce((prev, curr) => prev + curr);
+      return this.getPendingTransfers().map( (tx) => (tx.fee ? - tx.fee : 0) + tx.signedAmount).reduce((prev, curr) => prev + curr);
   }
 };
