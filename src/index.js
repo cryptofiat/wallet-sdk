@@ -534,7 +534,23 @@ export class Application {
 		});
 	}
     }
+    //TODO: remove
+    approveWithTest(address,idCode) {
 
+        return Utils.xhrPromise(this.ID_SERVER_HTTP + idCode + '/'+address).then((res) => {
+            res = JSON.parse(res);
+            switch (res.authenticationStatus) {
+                case 'LOGIN_SUCCESS':
+		    this.escrowToPending(res.escrowTransfers);
+                    return { ownerId: res.ownerId, transactionHash: res.transactionHash };
+                    break;
+                case 'LOGIN_EXPIRED':
+                case 'LOGIN_FAILURE':
+                    return false;
+                    break;
+            }
+        });
+    }
     approveWithEstonianIdCard(address) {
 
         return Utils.xhrPromise(this.ID_SERVER_HTTPS + 'authorisations/idCards', JSON.stringify({
