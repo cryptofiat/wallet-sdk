@@ -537,7 +537,7 @@ export class Application {
     //TODO: remove
     approveWithTest(address,idCode) {
 
-        return Utils.xhrPromise(this.ID_SERVER_HTTP + idCode + '/'+address).then((res) => {
+        return Utils.xhrPromise(this.ID_SERVER + idCode + '/'+address).then((res) => {
             res = JSON.parse(res);
             switch (res.authenticationStatus) {
                 case 'LOGIN_SUCCESS':
