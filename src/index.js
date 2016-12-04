@@ -6,6 +6,7 @@ import http from 'http';
 import * as Utils from './Utils';
 
 import MobileId from './providers/MobileId';
+import Pending from './Pending';
 
 export class Application {
 
@@ -19,6 +20,9 @@ export class Application {
 
     attachStorage(storage) {
         this._storage = storage;
+
+	//initialise Pending
+	this.pending = new Pending(storage);
         return this;
     }
 
@@ -175,6 +179,43 @@ export class Application {
 
             });
     }
+
+    //TODO: JUST A TEST - TO BE REMOVED;
+ 
+    testSignature(amount, fee, toaddr, nonce) {
+
+	let key = eth.toBuffer("0xc33d80b3fddd6bc5d62498905b90c94cf1252ffd846def3b530acd803bbb3783");
+
+        let shainput = "0x";
+
+	shainput = shainput.concat(
+            this.uint256Hex(nonce),
+            toaddr,
+            this.uint256Hex(amount),
+            this.uint256Hex(fee)
+        );
+
+	console.log("Hash in 16: ", shainput.toString('hex') );
+
+        let sha = eth.sha3(shainput);
+
+	console.log("Hash: ", sha);
+	console.log("Hash in 16: ", sha.toString('hex') );
+
+        // create a signed transfer
+        let ec2 = eth.ecsign(sha, key);
+
+        var postData = {
+            "amount": amount,
+            "fee": fee,
+            "nonce": nonce,
+            "targetAccount": "0x" + toaddr,
+            "signature": eth.bufferToHex(ec2.r).slice(2)
+            + eth.bufferToHex(ec2.s).slice(2) + ec2.v.toString(16)
+        };
+        console.log("postData: ", postData);
+     };
+
 
     //TODO: this should be structured better with sendAsync()
     sendToBankAsync(toIBAN, amount, ref, recipientName, _data) {
@@ -458,6 +499,7 @@ export class Application {
             res = JSON.parse(res);
             switch (res.authenticationStatus) {
                 case 'LOGIN_SUCCESS':
+		    this.escrowToPending(res.escrowTransfers);
                     return { ownerId: res.ownerId, transactionHash: res.transactionHash };
                     break;
                 case 'LOGIN_EXPIRED':
@@ -483,6 +525,16 @@ export class Application {
 
     }
 
+    escrowToPending(escrowArray) {
+        if (escrowArray && escrowArray.length > 0) {
+		//expecting array {amount, transactionHash, timestamp}
+		// put to pending array
+		escrowArray.map((escrow) => {
+		    this.pending.storePendingTransfer(escrow);
+		});
+	}
+    }
+
     approveWithEstonianIdCard(address) {
 
         return Utils.xhrPromise(this.ID_SERVER_HTTPS + 'authorisations/idCards', JSON.stringify({
@@ -492,6 +544,7 @@ export class Application {
             res = JSON.parse(res);
             switch (res.authenticationStatus) {
                 case 'LOGIN_SUCCESS':
+		    this.escrowToPending(res.escrowTransfers);
                     return { ownerId: res.ownerId, transactionHash: res.transactionHash };
                     break;
                 case 'LOGIN_EXPIRED':
@@ -566,6 +619,7 @@ export function stripHexPrefix(str) {
 /*
  var app = new Application();
  app.attachStorage(window.localStorage);
+ app.testSignature(3,0,"65fa6548764c08c0dd77495b33ed302d0c212691",1)
  app.initLocalStorage("mypass");
  console.log("Unlocked? ",app.isUnlocked());
 // var addr = app.storeNewKey();

@@ -9,7 +9,8 @@ module.exports = {
         modules: [
             path.resolve('./src'),
             path.resolve('./node_modules')
-        ]
+        ],
+	extensions: ["", ".webpack.js", ".web.js", ".ts", ".tsx", ".js"]
     },
     module: {
         loaders: [
@@ -22,6 +23,7 @@ module.exports = {
                 }
             },
             {test: /\.json/, loader: "json"},
+            {test: /\.tsx?$/, loader: "ts-loader"},
         ]
     }
 };
