@@ -1,11 +1,12 @@
 import { Transfer, TransferReference } from './providers/transfer-data';
 
+// THIS FILE  IS NOT  USED DIRECTLY AT THE MOMENT BECAUSE
+// IONIC WASN'T ABLE TO LOAD THE MODULE WITH TYPESCRIPT  
+
+// RUN $> tsc Pending.ts BEFORE  COMMIT
+
 export default class Pending {
 	constructor( public storage : Storage ) { }
-	public hello( world  : string) : string {
-		return "hello " + world + this.storage.getItem("junk");;
-	};
-  // Penging Transfers <<= this part should move to wallet-sdk
 
   public storePendingTransfer(tx : Transfer){
       let storedJson : string;
@@ -38,5 +39,4 @@ export default class Pending {
       if (this.getPendingTransfers().length == 0) return 0;
       return this.getPendingTransfers().map( (tx) => (tx.fee ? tx.fee : 0) + tx.amount).reduce((prev, curr) => prev + curr);
   }
-  // END Pending TX
 };
