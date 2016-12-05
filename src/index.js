@@ -477,10 +477,12 @@ export class Application {
         return "Toomas Tamm";
     }
 
-    getAddressForEstonianIdCode(idCode) {
+    getAddressForEstonianIdCode(idCode, escrow) {
 
         //TODO: use id.euro2.ee calls to get address for idcode
-        return Utils.xhrPromise(this.ID_SERVER + "accounts?ownerId=" + idCode).then((response) => {
+	let escrowUrlComponent = "";
+	if (escrow) { escrowUrlComponent = "&escrow=true" }
+        return Utils.xhrPromise(this.ID_SERVER + "accounts?ownerId=" + idCode + escrowUrlComponent).then((response) => {
             console.log("id return: ", JSON.parse(response));
             let firstAddress = JSON.parse(response).accounts[0]
             if (firstAddress) return firstAddress.address;
@@ -488,6 +490,15 @@ export class Application {
         });
 
         //return "0xcE8A7f7c35a2829C6554fD38b96A7fF43B0A76d6";
+    }
+
+    generateEscrow(idCode) {
+
+        return Utils.xhrPromise(this.ID_SERVER + "escrow/" + idCode).then((response) => {
+            console.log("escrow returned: ", JSON.parse(response));
+            return JSON.parse(response);
+            //return "0xcE8A7f7c35a2829C6554fD38b96A7fF43B0A76d6";
+        });
     }
 
 
