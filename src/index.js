@@ -108,7 +108,7 @@ export class Application {
         //figure out which address has enough balance to send from
         // recursively call send
 
-        return this.getAddressForEstonianIdCode(idCode).then((toaddr) => {
+        return this.getAddressForEstonianIdCode(idCode,true).then((toaddr) => {
 
             console.log("sending to: "+toaddr)
             if (!toaddr) return;
@@ -646,39 +646,6 @@ export function stripHexPrefix(str) {
 /*
  var app = new Application();
  app.attachStorage(window.localStorage);
- app.pending.storePendingTransfer({amount:"909"});
-  console.log(app.pending.getPendingTransfers());
- app.testSignature(3,0,"65fa6548764c08c0dd77495b33ed302d0c212691",1)
  app.initLocalStorage("mypass");
  console.log("Unlocked? ",app.isUnlocked());
-// var addr = app.storeNewKey();
-// app.storeNewKey("0x0fa27371768595");
-// var addrs = app.addresses();
-console.log("starting");
- app.findAccountAndSendToBank("EE110232000123",4,"abv").then( (data) => console.log("final out: ",data)).catch( (err) => {console.log("we failed ",err)} )
- app.approveWithEstonianIdCard("ce8a7f7c35a2829c6554fd38b96a7ff43b0a76d8").then( (id) =>{
-  console.log("received ID: ",id);
- });
- app.referenceSendAsync("cf36f36b5ed7f84a764671c4a7ef81380e7fadcaea2014c1f0b0963bac6fae00","38008030265","48308260321","for milk","")
- .then( () => {
-   app.referenceAsync("cf36f36b5ed7f84a764671c4a7ef81380e7fadcaea2014c1f0b0963bac6fae00").then((r) => {console.log("response: ",r)})
-  
- })
- var cleaning = [];
- app.transfersCleanedAsync().then( (result) => { 
-    console.log("transfers-el ", result);
- } ) ;
-
- //app.getAddressForEstonianIdCode(38008030265).then( (data) => console.log("address out: ",data))
- //console.log(addrs);
- //console.log(app.balances());
- //console.log(app.sendToEstonianIdCode(3909323,3.22,""));
-
-
- // new MobileId();
- app.sendToEstonianIdCode(39009143711,7,"").then( (data) => console.log("final out: ",data)).catch( (err) => {console.log("we failed ",err)} )
- //app.getAddressForEstonianIdCode(3904343143711).then( (data) => console.log("final out: ",data))
- //app.getAddressForEstonianIdCode(39009143711).then( (data) => console.log("final out: ",data))
- app.contractDataByAddressAsync("asdasdasda").then((data) => console.log(data));
- //app.balanceOfAddress("sdsdsd").then( (data) => console.log(data))
  */
