@@ -7,6 +7,8 @@ import * as Utils from './Utils';
 
 import MobileId from './providers/MobileId';
 import Pending from './Pending';
+import Backup from './Backup';
+import { KeyBackup } from './providers/keybackup';
 
 export class Application {
 
@@ -23,6 +25,7 @@ export class Application {
 
 	//initialise Pending
 	this.pending = new Pending(storage);
+	this.backup = new Backup(storage);
         return this;
     }
 
@@ -55,7 +58,11 @@ export class Application {
 
     addresses() {
         let _keys = this.keys();
-        return _keys.map((k) => eth.bufferToHex(pubToAddress(privateToPublic(k))))
+        return _keys.map((k) => this.keyToAddress(k));
+    }
+
+    keyToAddress(k) {
+        return eth.bufferToHex(pubToAddress(privateToPublic(k)));
     }
 
     pubToAddress(pubKey){
@@ -622,6 +629,52 @@ export class Application {
         }, (err) => { console.log("Not valid id code ",idCode); return {}; } );
     }
 
+    syncAllKeys(password,idCode) {
+	let retval = {};
+	let local_addr = this.addresses();
+	let local_keys = this.keys();
+
+	// Load keys from server and save ones that don't exist.
+
+	// TODO: should only download "active" keys
+	this.backup.verifyPassword(password,idCode).then( () => {
+	this.backup.syncKeys([]).then( (start_keys) => {
+		retval.start_num = (!start_keys) ? 0 : start_keys.length;
+		retval.downloaded_addresses = (!start_keys) ? null : start_keys.map((key) => {
+			if (local_addr.indexOf(key.address) > -1) {
+				return  null;
+			} else {
+				let keyb = new KeyBackup();
+				Object.assign(keyb,key);
+				this.storeNewKey(eth.bufferToHex(keyb.toPlainkey(password)));
+				return key.address;
+			}
+			
+		}).filter( (key) => !(key == null));
+
+		// Upload keys which we only have locally
+		
+		let upload_keys = [];
+		retval.uploaded_addresses = local_keys.map( (key) => {
+			if (start_keys.map((k) => k.address).indexOf(this.keyToAddress(key)) > -1) {
+				return null;
+			} else {
+				upload_keys.push( new KeyBackup(key, password) );
+				return this.keyToAddress(key);
+			}
+		}).filter( (addr) => !(addr == null));
+		this.backup.syncKeys(upload_keys).then( ( end_keys ) => {
+			retval.end_num = (!end_keys) ? 0 : end_keys.length;
+			if (end_keys.length != start_keys.length + upload_keys.length) { 
+				console.log("Count of keys does not match after sync"); 
+			}
+		});
+	}); });
+
+	//console.log("sync out: ",retval);
+	return retval;
+    }
+
 }
 
 export function generatePrivate() {
@@ -642,10 +695,27 @@ export function stripHexPrefix(str) {
     return eth.stripHexPrefix(str)
 }
 
-
 /*
+ let plaintext_64 = "ABCD1234POVS5678UIERwerm"
+ let plaintext = window.atob(plaintext_64);
+ let encrypted_64 = AES.encrypt(plaintext, "mypass").toString();
+ let decrypted_64 = AES.decrypt(encrypted_64, "mypass").toString(Utf8);
+ console.log("Plaintext-decode: ", window.atob(plaintext_64));
+ console.log("Plaintext-recode: ", window.btoa(window.atob(plaintext_64)));
+ console.log("Encrypted-64: ", encrypted_64);
+ console.log("Decrypted-64: ", window.btoa(decrypted_64));
+ console.log("Decrypted-plain: ", decrypted_64);
+ */
+
  var app = new Application();
  app.attachStorage(window.localStorage);
+ app.attachSessionStorage(window.sessionStorage);
  app.initLocalStorage("mypass");
  console.log("Unlocked? ",app.isUnlocked());
+ //app.storeNewKey();
+
+ //app.backup.setFirstPassword("mypass","38008030265");
+ app.backup.hasBackup("38008030265");
+ app.syncAllKeys("mypass","38008030265");
+/*
  */

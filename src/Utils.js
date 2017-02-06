@@ -1,4 +1,4 @@
-export function xhr(url, data, cb, method = 'GET', ecb = null, withCredentials = false) {
+export function xhr(url, data, cb, method = "GET", ecb = null, withCredentials = false) {
     var xhr = new XMLHttpRequest();
     xhr.open(method, url, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -17,7 +17,7 @@ export function xhr(url, data, cb, method = 'GET', ecb = null, withCredentials =
     return xhr;
 }
 
-export function xhrPromise(url, data, method = 'GET', withCredentials = false) {
+export function xhrPromise(url, data, method = "GET", withCredentials = false) {
     return new Promise((resolve, reject) => xhr(url, data, resolve, method, reject, withCredentials))
 }
 
