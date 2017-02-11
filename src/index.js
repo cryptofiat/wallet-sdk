@@ -52,7 +52,12 @@ export class Application {
             return [];
         }
 
-        let _enckeys = JSON.parse(this._storage.getItem("keys"));
+        let _enckeys = [];
+        let _enckeys_stored = JSON.parse(this._storage.getItem("keys"));
+        if (_enckeys_stored && _enckeys_stored.length > 0) {
+                _enckeys = _enckeys_stored;
+        };
+
         return _enckeys.map((k) => eth.toBuffer("0x" + AES.decrypt(k, this.getSecret()).toString(Utf8)))
     }
 
@@ -707,6 +712,7 @@ export function stripHexPrefix(str) {
  console.log("Decrypted-plain: ", decrypted_64);
  */
 
+/*
  var app = new Application();
  app.attachStorage(window.localStorage);
  app.attachSessionStorage(window.sessionStorage);
@@ -717,5 +723,4 @@ export function stripHexPrefix(str) {
  //app.backup.setFirstPassword("mypass","38008030265");
  app.backup.hasBackup("38008030265");
  app.syncAllKeys("mypass","38008030265");
-/*
  */
