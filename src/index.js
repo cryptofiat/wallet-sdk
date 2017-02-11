@@ -642,8 +642,9 @@ export class Application {
 	// Load keys from server and save ones that don't exist.
 
 	// TODO: should only download "active" keys
-	this.backup.verifyPassword(password,idCode).then( () => {
-	this.backup.syncKeys([]).then( (start_keys) => {
+
+	return this.backup.verifyPassword(password,idCode).then( () => {
+	return this.backup.syncKeys([]).then( (start_keys) => {
 		retval.start_num = (!start_keys) ? 0 : start_keys.length;
 		retval.downloaded_addresses = (!start_keys) ? null : start_keys.map((key) => {
 			if (local_addr.indexOf(key.address) > -1) {
@@ -668,16 +669,16 @@ export class Application {
 				return this.keyToAddress(key);
 			}
 		}).filter( (addr) => !(addr == null));
-		this.backup.syncKeys(upload_keys).then( ( end_keys ) => {
+		return this.backup.syncKeys(upload_keys).then( ( end_keys ) => {
 			retval.end_num = (!end_keys) ? 0 : end_keys.length;
 			if (end_keys.length != start_keys.length + upload_keys.length) { 
 				console.log("Count of keys does not match after sync"); 
 			}
+			return retval;
 		});
 	}); });
 
 	//console.log("sync out: ",retval);
-	return retval;
     }
 
 }
