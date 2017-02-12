@@ -89,6 +89,19 @@ export class Application {
         return privateToPublic(newPriv);
     }
 
+    removeKey(privKeyHex){
+
+	let keysHex = this.keys().map( (k) => eth.bufferToHex(k));
+        let keyIndex = keysHex.indexOf(privKeyHex);
+        if (keyIndex > -1) {
+        	let encKeysArray = JSON.parse(this._storage.getItem("keys")) || [];
+                encKeysArray.splice(keyIndex,1);
+        	this._storage.setItem("keys", JSON.stringify(encKeysArray));
+        } else {
+		console.log("Private key not found for removal: ", privKeyHex);
+	}
+    }
+
     isUnlocked() {
         return !!(this.getSecret());
     }
