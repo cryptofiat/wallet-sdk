@@ -650,6 +650,12 @@ export class Application {
         }, (err) => { console.log("Not valid id code ",idCode); return {}; } );
     }
 
+    searchLdapAsync(searchString) {
+        return Utils.xhrPromise(this.ID_SERVER + "/ldap/search?searchString=" + searchString).then((response) => {
+            return JSON.parse(response)
+        }, (err) => { console.log("Ldap search failed. Maybe query too short: ",searchString); } );
+    }
+
     syncAllKeys(password,idCode) {
 	let retval = {};
 	let local_addr = this.addresses();
