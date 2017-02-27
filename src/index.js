@@ -18,6 +18,7 @@ export class Application {
         this.ID_SERVER_HTTPS = "https://id.euro2.ee/v1/";
         this.WALLET_SERVER = "http://wallet.euro2.ee:8080/v1/";
         this.REF_SERVER = "http://wallet.euro2.ee:8000/";
+        this.rcpt_history = [];
     }
 
     attachStorage(storage) {
@@ -422,6 +423,8 @@ export class Application {
 		     if (names.idCode) {
 			 tx.counterPartyFirstName = names.firstName;
 			 tx.counterPartyLastName = names.lastName;
+                         // hook to store recent recipients
+                         this.storeRecipientHistory(names,tx.timestamp);
 		     }
 		     return tx;
 	         }, (err) => {return tx;} );
