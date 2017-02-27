@@ -694,6 +694,26 @@ export class Application {
 	//console.log("sync out: ",retval);
     }
 
+    // should move to separate module
+    storeRecipientHistory(recipientJson, time) {
+
+      let rcpt_check = this.rcpt_history[String(recipientJson.idCode)];
+
+      if ( !rcpt_check || rcpt_check.time < time ) {
+        this.rcpt_history[String(recipientJson.idCode)] = {
+          firstName : recipientJson.firstName,
+          lastName : recipientJson.lastName,
+          idCode : recipientJson.idCode,
+          time : time
+        }
+      }
+    }
+
+    getRecentRecipients() {
+      return this.rcpt_history;
+    }
+
+
 }
 
 export function generatePrivate() {
