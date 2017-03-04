@@ -723,6 +723,19 @@ export class Application {
     }
 
 
+    contractInfo() {
+        return Utils.xhrPromise(this.WALLET_SERVER + "contractInfo").then((response) => {
+            return JSON.parse(response)
+        });
+    }
+
+    notifyEscrow(postData) {
+		console.log("sending  escrow email: ", postData);
+		return Utils.xhrPromise(this.WALLET_SERVER + "notifyEscrow", JSON.stringify(postData), "POST").then((response) => {
+		    return JSON.parse(response);
+		});
+    };
+
 }
 
 export function generatePrivate() {
