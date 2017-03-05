@@ -18,6 +18,8 @@ export class Application {
         this.ID_SERVER_HTTPS = "https://id.euro2.ee/v1/";
         this.WALLET_SERVER = "http://wallet.euro2.ee:8080/v1/";
         this.REF_SERVER = "http://wallet.euro2.ee:8000/";
+	this.ETHERSCAN_APIKEY="S6HD1XTENHEHJS3Z35NWSGD4NE8G4DISBA";
+        this.ETHERSCAN_SERVER = "https://api.etherscan.io/api?apikey=" + this.ETHERSCAN_APIKEY;
         this.rcpt_history = [];
     }
 
@@ -197,6 +199,8 @@ export class Application {
 				() => { console.log("References submitted for ", res.id) },
 			        (err) => { console.log("Reference submission failed with error: ", err) }
 			   );
+			   res.toAddress = this.getBankProxyAddress();
+			   res.fromAddress = account;
 			   return res;
                         })
                         //return true;
@@ -725,17 +729,20 @@ export class Application {
 
 
     contractInfo() {
-        return Utils.xhrPromise(this.WALLET_SERVER + "contractInfo").then((response) => {
+        return Utils.xhrPromise(this.WALLET_SERVER + "transfers/contractInfo").then((response) => {
             return JSON.parse(response)
         });
     }
 
     notifyEscrow(postData) {
-		console.log("sending  escrow email: ", postData);
-		return Utils.xhrPromise(this.WALLET_SERVER + "notifyEscrow", JSON.stringify(postData), "POST").then((response) => {
+	return Utils.xhrPromise(this.WALLET_SERVER + "transfers/notifyEscrow", JSON.stringify(postData), "POST").then((response) => {
 		    return JSON.parse(response);
 		});
     };
+
+    totalSupplyEtherscan(contract) {
+	return Utils.xhrPromise(this.ETHERSCAN_SERVER + "&module=stats&action=tokensupply&contractaddress="+contract).then((response) => { return JSON.parse(response).result});
+    }
 
 }
 

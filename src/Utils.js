@@ -1,7 +1,12 @@
 export function xhr(url, data, cb, method = "GET", ecb = null, withCredentials = false) {
     var xhr = new XMLHttpRequest();
     xhr.open(method, url, true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
+
+    //because a pre-flight error from etherscan.io
+    if (method == "POST") {
+      xhr.setRequestHeader('Content-Type', 'application/json');
+    }
+
     xhr.withCredentials = withCredentials;
     xhr.send(data);
     if (cb) {
