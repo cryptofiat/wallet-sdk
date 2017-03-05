@@ -136,7 +136,6 @@ export class Application {
 
         return this.getAddressForEstonianIdCode(idCode,true).then((toaddr) => {
 
-            console.log("sending to: "+toaddr)
             if (!toaddr) return;
 
             return this.contractDataAsync().then((bal) => {
@@ -152,6 +151,8 @@ export class Application {
 				() => { console.log("References submitted for ", res.id) },
 			        (err) => { console.log("Reference submission failed with error: ", err) }
 			   );
+			   res.toAddress = toaddr;
+			   res.fromAddress = account;
 			   return res;
                         })
                         //return true;
