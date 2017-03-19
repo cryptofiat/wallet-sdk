@@ -147,7 +147,7 @@ export class Application {
                 for (var i in bal) {
 		    let account = bal[i];
                     //console.log("Balance of ", account.address, " is ", account.balance);
-                    if (account.balance > this.getFee() + amount) {
+                    if (account.balance >= this.getFee() + amount) {
                         return this.sendAsync(toaddr, amount, ref, account).then( (res) => {
 	                   this.referenceSendAsync(res.id,this.getEstonianIdCode(),idCode,ref).then(
 				() => { console.log("References submitted for ", res.id) },
@@ -193,7 +193,7 @@ export class Application {
                 for (var i in bal) {
 		    let account = bal[i];
                     //console.log("Balance of ", account.address, " is ", account.balance);
-                    if (account.balance > this.getBankFee() + amount) {
+                    if (account.balance >= this.getBankFee() + amount) {
                         return this.sendToBankAsync(toIBAN, amount, ref, recipientName, account).then( (res) => {
 	                   this.referenceSendAsync(res.id,this.getEstonianIdCode(),null,ref,null,toIBAN,recipientName).then(
 				() => { console.log("References submitted for ", res.id) },
@@ -739,6 +739,22 @@ export class Application {
 		    return JSON.parse(response);
 		});
     };
+
+
+    pushNotifyTransfer(toAddress, txHash, amount, senderIdCode, refText) {
+        var postData = { 
+                address: toAddress, 
+                transactionHash: txHash, 
+                amount: amount, 
+                idCode: senderIdCode,
+                referenceText: refText 
+        };
+        return Utils.xhrPromise(this.WALLET_SERVER + "push/transfer",JSON.stringify(postData), "POST").then((response) => {
+		// TODO: Fix server side to return JSON;
+               // return JSON.parse(response);
+		return {}; 
+        });
+    }
 
     totalSupplyEtherscan(contract) {
 	return Utils.xhrPromise(this.ETHERSCAN_SERVER + "&module=stats&action=tokensupply&contractaddress="+contract).then((response) => { return JSON.parse(response).result});
