@@ -5,7 +5,8 @@ var Utils = require('./Utils');
 // IONIC WASN'T ABLE TO LOAD THE MODULE WITH TYPESCRIPT  
 // RUN $> tsc Pending.ts BEFORE  COMMIT
 var Notifications = (function () {
-    function Notifications() {
+    function Notifications(sdk) {
+        this.sdk = sdk;
         this.ionicConfig = {
             server: "https://api.ionic.io/push/notifications",
             profile: "mysecurityprofile",
@@ -33,20 +34,22 @@ var Notifications = (function () {
     ;
     Notifications.prototype.notifyTransfer = function (tx) {
         var _this = this;
-        firebase.database().ref('/push/0x' + tx.targetAccount).once("value").then(function (snapshot) {
-            var tokens = [];
-            snapshot.forEach(function (tok) { tokens.push(tok.key); });
-            var notifyPost = {
-                tokens: tokens,
-                profile: _this.ionicConfig.profile,
-                notification: {
-                    title: "You received €" + tx.amount / 100,
-                    message: "From " + tx.counterPartyFirstName + " " + tx.counterPartyLastName,
-                    payload: tx
-                }
-            };
-            //console.log(notifyPost);
-            return Utils.xhrPromise(_this.ionicConfig.server, JSON.stringify(notifyPost), "POST", false, _this.ionicConfig.apiKey);
+        this.sdk.nameFromIdAsync(this.sdk.getEstonianIdCode()).then(function (nameRes) {
+            firebase.database().ref('/push/0x' + tx.targetAccount).once("value").then(function (snapshot) {
+                var tokens = [];
+                snapshot.forEach(function (tok) { tokens.push(tok.key); });
+                var notifyPost = {
+                    tokens: tokens,
+                    profile: _this.ionicConfig.profile,
+                    notification: {
+                        title: "You received €" + tx.amount / 100,
+                        message: "From " + nameRes.firstName + " " + nameRes.lastName,
+                        payload: tx
+                    }
+                };
+                //console.log(notifyPost);
+                return Utils.xhrPromise(_this.ionicConfig.server, JSON.stringify(notifyPost), "POST", false, _this.ionicConfig.apiKey);
+            });
         });
     };
     return Notifications;
