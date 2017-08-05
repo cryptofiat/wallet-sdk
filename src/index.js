@@ -8,6 +8,7 @@ import * as Utils from './Utils';
 import MobileId from './providers/MobileId';
 import Pending from './Pending';
 import Backup from './Backup';
+import Notifications from './Notifications';
 import { KeyBackup } from './providers/keybackup';
 
 export class Application {
@@ -29,6 +30,7 @@ export class Application {
 	//initialise Pending
 	this.pending = new Pending(storage);
 	this.backup = new Backup(storage);
+        this.notifications = new Notifications();
         return this;
     }
 
@@ -798,6 +800,8 @@ export function stripHexPrefix(str) {
  app.attachSessionStorage(window.sessionStorage);
  app.initLocalStorage("mypass");
  console.log("Unlocked? ",app.isUnlocked());
+ app.notifications.registerToken("mysecondtoken",["0x123231","0x54343"]);
+ app.notifications.notifyTransfer({"targetAccount":"0x54343","amount":44,"sourceAccount":"0x03231eb421"});
  //app.storeNewKey();
 
  //app.backup.setFirstPassword("mypass","38008030265");

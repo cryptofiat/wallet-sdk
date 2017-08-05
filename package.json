@@ -1,8 +1,8 @@
 {
   "name": "cryptofiat-wallet",
   "version": "0.1.0",
-  "license" : "MIT",
-  "repository" : "cryptofiat/wallet-sdk",
+  "license": "MIT",
+  "repository": "cryptofiat/wallet-sdk",
   "scripts": {
     "webpack-dev-server": "webpack-dev-server",
     "webpack": "webpack",
@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "crypto-js": "^3.1.7",
-    "ethereumjs-util": "^4.5.0"
+    "ethereumjs-util": "^4.5.0",
+    "firebase": "^4.2.0"
   },
   "devDependencies": {
     "@types/node": "0.0.2",

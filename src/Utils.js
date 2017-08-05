@@ -1,10 +1,13 @@
-export function xhr(url, data, cb, method = "GET", ecb = null, withCredentials = false) {
+export function xhr(url, data, cb, method = "GET", ecb = null, withCredentials = false, bearer = null) {
     var xhr = new XMLHttpRequest();
     xhr.open(method, url, true);
 
     //because a pre-flight error from etherscan.io
     if (method == "POST") {
       xhr.setRequestHeader('Content-Type', 'application/json');
+    }
+    if (bearer) {
+      xhr.setRequestHeader('Authorization', 'Bearer '+bearer);
     }
 
     xhr.withCredentials = withCredentials;
@@ -22,7 +25,7 @@ export function xhr(url, data, cb, method = "GET", ecb = null, withCredentials =
     return xhr;
 }
 
-export function xhrPromise(url, data, method = "GET", withCredentials = false) {
-    return new Promise((resolve, reject) => xhr(url, data, resolve, method, reject, withCredentials))
+export function xhrPromise(url, data, method = "GET", withCredentials = false, bearer = null) {
+    return new Promise((resolve, reject) => xhr(url, data, resolve, method, reject, withCredentials, bearer))
 }
 
