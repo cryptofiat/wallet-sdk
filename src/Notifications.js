@@ -28,29 +28,25 @@ var Notifications = (function () {
     Notifications.prototype.registerToken = function (token, addresses) {
         addresses.forEach(function (address) {
             firebase.database().ref('/push/' + address + '/' + token).set({ active: true });
-            console.log("Send relationship for: " + address + " token " + token);
         });
     };
     ;
     Notifications.prototype.notifyTransfer = function (tx) {
         var _this = this;
         firebase.database().ref('/push/' + tx.targetAccount).once("value").then(function (snapshot) {
-            snapshot.forEach(function (tok) {
-                if (tok.val().active) {
-                    // notify token tok.key
-                    var notifyPost = {
-                        tokens: [tok.key],
-                        profile: _this.ionicConfig.profile,
-                        notification: {
-                            title: "You received €" + tx.amount,
-                            message: "From " + tx.sourceAccount
-                        }
-                    };
-                    console.log(notifyPost);
-                    Utils.xhrPromise(_this.ionicConfig.server, JSON.stringify(notifyPost), "POST", false, _this.ionicConfig.apiKey).then(function (res) { console.log("success posting: ", res); }, function (err) { console.log("error", err); });
-                    console.log('Notify token: ', tok.key);
+            var tokens = [];
+            snapshot.forEach(function (tok) { tokens.push(tok.key); });
+            var notifyPost = {
+                tokens: tokens,
+                profile: _this.ionicConfig.profile,
+                notification: {
+                    title: "You received €" + tx.amount,
+                    message: "From " + tx.counterPartyFirstName + " " + tx.counterPartyLastName,
+                    payload: tx
                 }
-            });
+            };
+            //console.log(notifyPost);
+            return Utils.xhrPromise(_this.ionicConfig.server, JSON.stringify(notifyPost), "POST", false, _this.ionicConfig.apiKey);
         });
     };
     return Notifications;

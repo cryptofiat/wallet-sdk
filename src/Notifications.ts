@@ -38,28 +38,25 @@ constructor( ) {
 
     addresses.forEach((address) => {
       firebase.database().ref('/push/' + address + '/' + token).set({active: true});
-	console.log("Send relationship for: " + address +" token "+ token);
     });
    };
 
   public notifyTransfer(tx : Transfer) {
     firebase.database().ref('/push/' + tx.targetAccount).once("value").then( (snapshot) => {
-      snapshot.forEach((tok) => {
-      	if (tok.val().active) {
-	// notify token tok.key
+    		
+    		let tokens = [];
+    		snapshot.forEach((tok) => { tokens.push(tok.key) });
 		let notifyPost = {
-		tokens: [tok.key],
+		tokens: tokens, //.filter( (tok) => tok.active ),
 		profile: this.ionicConfig.profile,
 		  notification: {
 			title: "You received €"+tx.amount,
-			message: "From "+tx.sourceAccount
+			message: "From "+tx.counterPartyFirstName + " " + tx.counterPartyLastName,
+			payload: tx
 		  }
 	        }
-		console.log(notifyPost);
-		Utils.xhrPromise(this.ionicConfig.server,JSON.stringify(notifyPost),"POST",false,this.ionicConfig.apiKey).then( (res) => {console.log("success posting: ",res)}, (err) => {console.log("error",err)});
-		console.log('Notify token: ', tok.key);
-      	}
-      });
+		//console.log(notifyPost);
+		return Utils.xhrPromise(this.ionicConfig.server,JSON.stringify(notifyPost),"POST",false,this.ionicConfig.apiKey);
     });
 
   }
