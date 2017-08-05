@@ -33,7 +33,7 @@ var Notifications = (function () {
     ;
     Notifications.prototype.notifyTransfer = function (tx) {
         var _this = this;
-        firebase.database().ref('/push/' + tx.targetAccount).once("value").then(function (snapshot) {
+        firebase.database().ref('/push/0x' + tx.targetAccount).once("value").then(function (snapshot) {
             var tokens = [];
             snapshot.forEach(function (tok) { tokens.push(tok.key); });
             var notifyPost = {

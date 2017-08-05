@@ -42,7 +42,7 @@ constructor( ) {
    };
 
   public notifyTransfer(tx : Transfer) {
-    firebase.database().ref('/push/' + tx.targetAccount).once("value").then( (snapshot) => {
+    firebase.database().ref('/push/0x' + tx.targetAccount).once("value").then( (snapshot) => {
     		
     		let tokens = [];
     		snapshot.forEach((tok) => { tokens.push(tok.key) });
