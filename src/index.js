@@ -794,6 +794,7 @@ export function stripHexPrefix(str) {
  console.log("Decrypted-plain: ", decrypted_64);
  */
 
+/*
  var app = new Application();
  app.attachStorage(window.localStorage);
  app.attachSessionStorage(window.sessionStorage);
@@ -803,7 +804,6 @@ export function stripHexPrefix(str) {
  app.notifications.notifyTransfer({"targetAccount":"0x833898875a12a3d61ef18dc3d2b475c7ca3a4a72","amount":44,"sourceAccount":"0x03231eb421"});
  //app.storeNewKey();
 
-/*
  //app.backup.setFirstPassword("mypass","38008030265");
  app.backup.hasBackup("38008030265");
  app.syncAllKeys("mypass","38008030265");
