@@ -40,7 +40,7 @@ var Notifications = (function () {
                 tokens: tokens,
                 profile: _this.ionicConfig.profile,
                 notification: {
-                    title: "You received €" + tx.amount,
+                    title: "You received €" + tx.amount / 100,
                     message: "From " + tx.counterPartyFirstName + " " + tx.counterPartyLastName,
                     payload: tx
                 }

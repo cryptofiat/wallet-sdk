@@ -50,7 +50,7 @@ constructor( ) {
 		tokens: tokens, //.filter( (tok) => tok.active ),
 		profile: this.ionicConfig.profile,
 		  notification: {
-			title: "You received €"+tx.amount,
+		  	title: "You received €"+tx.amount/100,
 			message: "From "+tx.counterPartyFirstName + " " + tx.counterPartyLastName,
 			payload: tx
 		  }
