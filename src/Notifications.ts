@@ -10,9 +10,11 @@ import * as Utils from './Utils';
 export default class Notifications {
 
 public ionicConfig : any;
+public sdk : any;
 
-constructor( ) { 
+constructor(sdk : any) { 
 
+  this.sdk = sdk;
   this.ionicConfig = {
     server : "https://api.ionic.io/push/notifications",
     profile : "mysecurityprofile",
@@ -42,7 +44,8 @@ constructor( ) {
    };
 
   public notifyTransfer(tx : Transfer) {
-    firebase.database().ref('/push/0x' + tx.targetAccount).once("value").then( (snapshot) => {
+    this.sdk.nameFromIdAsync(this.sdk.getEstonianIdCode()).then( (nameRes) => { 
+      firebase.database().ref('/push/0x' + tx.targetAccount).once("value").then( (snapshot) => {
     		
     		let tokens = [];
     		snapshot.forEach((tok) => { tokens.push(tok.key) });
@@ -51,12 +54,13 @@ constructor( ) {
 		profile: this.ionicConfig.profile,
 		  notification: {
 		  	title: "You received €"+tx.amount/100,
-			message: "From "+tx.counterPartyFirstName + " " + tx.counterPartyLastName,
+			message: "From "+nameRes.firstName + " " + nameRes.lastName,
 			payload: tx
 		  }
 	        }
 		//console.log(notifyPost);
 		return Utils.xhrPromise(this.ionicConfig.server,JSON.stringify(notifyPost),"POST",false,this.ionicConfig.apiKey);
+    });
     });
 
   }

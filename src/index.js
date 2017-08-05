@@ -30,7 +30,7 @@ export class Application {
 	//initialise Pending
 	this.pending = new Pending(storage);
 	this.backup = new Backup(storage);
-        this.notifications = new Notifications();
+        this.notifications = new Notifications(this);
         return this;
     }
 
@@ -801,7 +801,7 @@ export function stripHexPrefix(str) {
  app.initLocalStorage("mypass");
  console.log("Unlocked? ",app.isUnlocked());
 // app.notifications.registerToken("mysecondtoken",["0x123231","0x54343"]);
- app.notifications.notifyTransfer({"targetAccount":"0x833898875a12a3d61ef18dc3d2b475c7ca3a4a72","amount":44,"sourceAccount":"0x03231eb421"});
+ app.notifications.notifyTransfer({"ref" : {"senderIdCode":"38008030265"},"targetAccount":"833898875a12a3d61ef18dc3d2b475c7ca3a4a72","amount":44,"sourceAccount":"0x03231eb421"});
  //app.storeNewKey();
 
  //app.backup.setFirstPassword("mypass","38008030265");
