@@ -3,7 +3,7 @@ export function xhr(url, data, cb, method = "GET", ecb = null, withCredentials =
     xhr.open(method, url, true);
 
     //because a pre-flight error from etherscan.io
-    if (method == "POST") {
+    if (method === 'POST' || method === 'PUT') {
       xhr.setRequestHeader('Content-Type', 'application/json');
     }
     if (bearer) {
