@@ -5,7 +5,6 @@ import Utf8 from 'crypto-js/enc-utf8';
 import http from 'http';
 import * as Utils from './Utils';
 
-import MobileId from './providers/MobileId';
 import Pending from './Pending';
 import Backup from './Backup';
 import Notifications from './Notifications';
