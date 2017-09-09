@@ -130,6 +130,37 @@ export class Application {
         this._storage.setItem("encryptedChallenge", AES.encrypt(this._secretChallenge, this._secret).toString());
     }
 
+    generatePaymentUri(address, amount, ref) {
+        return 'euro2:'+address+'/payment?amount='+amount+'&signature_type=ETH&message=' + encodeURIComponent(ref);
+    }
+
+    sendPaymentRequest (amount, ref) {
+        
+        let key = this.keys()[0];
+        let addr = eth.bufferToHex(pubToAddress(privateToPublic(key)));
+        var uri = this.generatePaymentUri(addr, amount, ref);
+        console.log('Address: ' + addr);
+
+        let sha = eth.sha3(uri);
+        console.log ('Hash: ' + eth.bufferToHex(sha));
+
+        // create a signed transfer
+        let ec2 = eth.ecsign(sha, key);
+        let signature = eth.bufferToHex(ec2.r).slice(2) + eth.bufferToHex(ec2.s).slice(2) + ec2.v.toString(16);
+        uri += '&signature='+signature;
+        console.log('URI: ' + uri);
+
+        var postData = {
+            "paymentUri": uri,
+        };
+        console.log("postData: ", postData);
+        //console.log(JSON.stringify(postData));
+
+        return Utils.xhrPromise(this.WALLET_SERVER + "transfers", JSON.stringify(postData), "POST").then((response) => {
+            return JSON.parse(response);
+        });
+    }
+
     sendToEstonianIdCode(idCode, amount, ref) {
 
         //call id.euro2.ee/v1/get/toIDCode to get address for 38008030201
