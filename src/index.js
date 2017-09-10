@@ -138,7 +138,7 @@ export class Application {
         let key = this.keys()[0];
         let addr = eth.bufferToHex(pubToAddress(privateToPublic(key)));
 
-	uriPathWithAddress = uriPath + '&signature_type=ETH'
+	let uriPathWithAddress = uriPath + '&signature_type=ETH'
         let sha = eth.sha3(uriPathWithAddress);
 
         // create a signed transfer
@@ -153,12 +153,12 @@ export class Application {
 
         var postData = {
             "paymentUri": 'euro2:'+uriPath,
-            "paymentUrl":  window.location.protocol +'://'
+            "paymentUrl":  window.location.protocol +'//'
 		+ window.location.hostname + ':'
 		+ window.location.port + '/' 
 		+ uriPath,
 	    "uriPath": uriPath,
-	    "uriPathWithAddress": signUriPath(uriPath)
+	    "uriPathWithAddress": this.signUriPath(uriPath)
         };
        return postData;
     }
