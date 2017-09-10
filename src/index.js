@@ -132,13 +132,13 @@ export class Application {
     }
 
     generatePaymentUriPath(idCode, amount, ref) {
-        return idCode+'/payment?amount='+amount+'&message=' + encodeURIComponent(ref);
+        return idCode+'/payment'+'/'+amount+'/'+encodeURIComponent(ref);
     }
     signUriPath(uriPath) {
         let key = this.keys()[0];
         let addr = eth.bufferToHex(pubToAddress(privateToPublic(key)));
 
-	let uriPathWithAddress = uriPath + '&signature_type=ETH'
+	let uriPathWithAddress = uriPath + '?signature_type=ETH&address'+addr
         let sha = eth.sha3(uriPathWithAddress);
 
         // create a signed transfer
