@@ -794,8 +794,8 @@ export class Application {
 	return Utils.xhrPromise(this.ETHERSCAN_SERVER + "&module=stats&action=tokensupply&contractaddress="+contract).then((response) => { return JSON.parse(response).result});
     }
 
-    spray(idCode) {
-        return Utils.xhrPromise(this.SPRAYER_SERVER + "spray", JSON.stringify({idCode: idCode}), "POST").then((response) => {
+    spray(idCode, amount) {
+        return Utils.xhrPromise(this.SPRAYER_SERVER + "spray", JSON.stringify({idCode: idCode, amount: amount}), "POST").then((response) => {
             return JSON.parse(response);
     });
     }
