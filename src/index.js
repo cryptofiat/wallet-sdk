@@ -154,12 +154,13 @@ export class Application {
         var postData = {
             "paymentUri": uri,
         };
-        console.log("postData: ", postData);
+	    return postData;
+        //console.log("postData: ", postData);
         //console.log(JSON.stringify(postData));
 
-        return Utils.xhrPromise(this.WALLET_SERVER + "transfers", JSON.stringify(postData), "POST").then((response) => {
-            return JSON.parse(response);
-        });
+        //return Utils.xhrPromise(this.WALLET_SERVER + "transfers", JSON.stringify(postData), "POST").then((response) => {
+        //    return JSON.parse(response);
+        //});
     }
 
     sendToEstonianIdCode(idCode, amount, ref) {
