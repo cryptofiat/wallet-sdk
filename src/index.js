@@ -155,7 +155,7 @@ export class Application {
             "paymentUri": 'euro2:'+uriPath,
             "paymentUrl":  window.location.protocol +'//'
 		+ window.location.hostname + ':'
-		+ window.location.port + '/' 
+		+ window.location.port + '/#/' 
 		+ uriPath,
 	    "uriPath": uriPath,
 	    "uriPathWithAddress": this.signUriPath(uriPath)
