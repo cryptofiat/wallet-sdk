@@ -131,36 +131,36 @@ export class Application {
         this._storage.setItem("encryptedChallenge", AES.encrypt(this._secretChallenge, this._secret).toString());
     }
 
-    generatePaymentUri(address, amount, ref) {
-        return 'euro2:'+address+'/payment?amount='+amount+'&signature_type=ETH&message=' + encodeURIComponent(ref);
+    generatePaymentUriPath(idCode, amount, ref) {
+        return idCode+'/payment?amount='+amount+'&message=' + encodeURIComponent(ref);
     }
-
-    sendPaymentRequest (amount, ref) {
-        
+    signUriPath(uriPath) {
         let key = this.keys()[0];
         let addr = eth.bufferToHex(pubToAddress(privateToPublic(key)));
-        var uri = this.generatePaymentUri(addr, amount, ref);
-        console.log('Address: ' + addr);
 
-        let sha = eth.sha3(uri);
-        console.log ('Hash: ' + eth.bufferToHex(sha));
+	uriPathWithAddress = uriPath + '&signature_type=ETH'
+        let sha = eth.sha3(uriPathWithAddress);
 
         // create a signed transfer
         let ec2 = eth.ecsign(sha, key);
         let signature = eth.bufferToHex(ec2.r).slice(2) + eth.bufferToHex(ec2.s).slice(2) + ec2.v.toString(16);
-        uri += '&signature='+signature;
-        console.log('URI: ' + uri);
+        return uriPathWithAddress + '&signature='+signature;
+    }
+
+    requestUriJson(amount, ref) {
+        
+        let uriPath = this.generatePaymentUriPath(this.getEstonianIdCode(), amount, ref);
 
         var postData = {
-            "paymentUri": uri,
+            "paymentUri": 'euro2:'+uriPath,
+            "paymentUrl":  window.location.protocol +'://'
+		+ window.location.hostname + ':'
+		+ window.location.port + '/' 
+		+ uriPath,
+	    "uriPath": uriPath,
+	    "uriPathWithAddress": signUriPath(uriPath)
         };
-	    return postData;
-        //console.log("postData: ", postData);
-        //console.log(JSON.stringify(postData));
-
-        //return Utils.xhrPromise(this.WALLET_SERVER + "transfers", JSON.stringify(postData), "POST").then((response) => {
-        //    return JSON.parse(response);
-        //});
+       return postData;
     }
 
     sendToEstonianIdCode(idCode, amount, ref) {
@@ -838,6 +838,7 @@ export function stripHexPrefix(str) {
  app.attachSessionStorage(window.sessionStorage);
  app.initLocalStorage("mypass");
  console.log("Unlocked? ",app.isUnlocked());
+ app.requestUriJson(300,'someref');
 // app.notifications.registerToken("mysecondtoken",["0x123231","0x54343"]);
  app.notifications.notifyTransfer({"ref" : {"senderIdCode":"38008030265"},"targetAccount":"833898875a12a3d61ef18dc3d2b475c7ca3a4a72","amount":44,"sourceAccount":"0x03231eb421"});
  //app.storeNewKey();
