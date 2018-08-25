@@ -21,7 +21,7 @@ export class Application {
 	this.ETHERSCAN_APIKEY="S6HD1XTENHEHJS3Z35NWSGD4NE8G4DISBA";
         this.ETHERSCAN_SERVER = "https://api.etherscan.io/api?apikey=" + this.ETHERSCAN_APIKEY;
         this.rcpt_history = [];
-        this.SPRAYER_SERVER="http://wallet.euro2.ee:8090/v1/";
+        this.SPRAYER_SERVER="https://sprayer-bot.euro2.ee/v1/";
     }
 
     attachStorage(storage) {
@@ -797,7 +797,9 @@ export class Application {
     spray(idCode, amount) {
         return Utils.xhrPromise(this.SPRAYER_SERVER + "spray", JSON.stringify({idCode: idCode, amount: amount}), "POST").then((response) => {
             return JSON.parse(response);
-    });
+        }, (error) => {
+            return JSON.parse(error);
+        });
     }
 
 }
