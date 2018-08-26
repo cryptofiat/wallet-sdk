@@ -14,11 +14,11 @@ export class Application {
 
     constructor() {
         this._secretChallenge = "QUICKBROWNMOOSEJUMPEDOVERTHEFENCEANDBROKEHERLEG"; //some random text would
-        this.ID_SERVER = "http://id.euro2.ee:8080/v1/";
+        this.ID_SERVER = "https://account-identity.euro2.ee/v1/";
         this.ID_SERVER_HTTPS = "https://id.euro2.ee/v1/";
-        this.WALLET_SERVER = "http://wallet.euro2.ee:8080/v1/";
-        this.REF_SERVER = "http://wallet.euro2.ee:8000/";
-	this.ETHERSCAN_APIKEY="S6HD1XTENHEHJS3Z35NWSGD4NE8G4DISBA";
+        this.WALLET_SERVER = "https://wallet-server.euro2.ee/v1/";
+        this.REF_SERVER = "https://transfer-info.euro2.ee/";
+    	this.ETHERSCAN_APIKEY="S6HD1XTENHEHJS3Z35NWSGD4NE8G4DISBA";
         this.ETHERSCAN_SERVER = "https://api.etherscan.io/api?apikey=" + this.ETHERSCAN_APIKEY;
         this.rcpt_history = [];
         this.SPRAYER_SERVER="https://sprayer-bot.euro2.ee/v1/";

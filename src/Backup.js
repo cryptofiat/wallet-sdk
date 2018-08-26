@@ -1,17 +1,17 @@
 "use strict";
-var Utils = require('./Utils');
-var crypto_js_1 = require('crypto-js');
-var crypto = require('crypto');
+exports.__esModule = true;
+var Utils = require("./Utils");
+var crypto_js_1 = require("crypto-js");
+var crypto = require("crypto");
 // THIS FILE  IS NOT  USED DIRECTLY AT THE MOMENT BECAUSE
 // IONIC WASN'T ABLE TO LOAD THE MODULE WITH TYPESCRIPT  
 // RUN $> tsc Backup.ts BEFORE  COMMIT
-var Backup = (function () {
+var Backup = /** @class */ (function () {
     function Backup(storage) {
         this.storage = storage;
-        this.BACKUP_SERVER = "http://id.euro2.ee:8080/v1/backup/";
+        this.BACKUP_SERVER = "https://account-identity.euro2.ee/v1/backup/";
     }
     ;
-    //public BACKUP_SERVER : string = "http://localhost:8080/v1/backup/";
     Backup.prototype.setFirstPassword = function (password, idCode) {
         // server takes  plaintext  in base64, but the encrypt funciton takes raw bytes 
         var _plaintext_64 = crypto.randomBytes(24).toString('base64');
@@ -65,6 +65,5 @@ var Backup = (function () {
     };
     return Backup;
 }());
-exports.__esModule = true;
 exports["default"] = Backup;
 ;

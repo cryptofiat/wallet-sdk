@@ -1,10 +1,11 @@
 "use strict";
-var eth = require('ethereumjs-util');
-var crypto_js_1 = require('crypto-js');
+exports.__esModule = true;
+var eth = require("ethereumjs-util");
+var crypto_js_1 = require("crypto-js");
 // THIS FILE  IS NOT  USED DIRECTLY AT THE MOMENT BECAUSE
 // IONIC WASN'T ABLE TO LOAD THE MODULE WITH TYPESCRIPT  
 // RUN $> tsc Backup.ts BEFORE  COMMIT
-var KeyBackup = (function () {
+var KeyBackup = /** @class */ (function () {
     function KeyBackup(plainkey, password) {
         this.active = true;
         if (plainkey && password) {

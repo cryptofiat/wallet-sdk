@@ -12,8 +12,7 @@ export default class Backup {
 	constructor( public storage : Storage ) { };
 	public password : string;
 	public challenge : string;
-        public BACKUP_SERVER : string = "http://id.euro2.ee:8080/v1/backup/";
-        //public BACKUP_SERVER : string = "http://localhost:8080/v1/backup/";
+    public BACKUP_SERVER : string = "https://account-identity.euro2.ee/v1/backup/";
 
 	public setFirstPassword(password: string, idCode : string) : Promise<boolean> {
 		// server takes  plaintext  in base64, but the encrypt funciton takes raw bytes 
